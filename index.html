@@ -227,6 +227,7 @@ Error generating stack: `+e.message+`
 #macau-special-panel button:disabled{cursor:not-allowed;opacity:.38}
 #macau-special-panel button:focus-visible,
 #macau-special-panel select:focus-visible,
+#macau-special-panel input:focus-visible,
 #macau-special-switch button:focus-visible,
 #macau-special-panel [tabindex]:focus-visible{outline:3px solid var(--smp-gold);outline-offset:2px}
 #macau-special-panel .smp-page-head{display:flex;justify-content:space-between;align-items:center;padding:12px 2px 18px}
@@ -271,6 +272,15 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-indicator-bar button.smp-on{border-color:#4aaddb;background:#236d9d;color:#fff;box-shadow:inset 0 0 0 1px #67c8f855}
 #macau-special-panel .smp-indicator-bar .smp-divider{width:1px;height:20px;margin:0 2px;background:#29415b}
 #macau-special-panel .smp-indicator-bar small{margin-right:auto;color:#8ba4c0;font-size:10px}
+#macau-special-panel .smp-ma-settings{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin:0 0 8px;padding:8px 10px;border:1px solid #29415b;border-radius:10px;background:#0a1a2c}
+#macau-special-panel .smp-ma-settings[hidden]{display:none!important}
+#macau-special-panel .smp-ma-settings>b{color:#dce8f6;font-size:11px;white-space:nowrap}
+#macau-special-panel .smp-ma-field{display:flex;align-items:center;gap:5px;color:#93aac1;font-size:10px;font-weight:800;white-space:nowrap}
+#macau-special-panel .smp-ma-field input{width:64px;min-height:36px;padding:6px 7px;border:1px solid #2c4462;border-radius:8px;background:#13263e;color:#eef5ff;font-size:12px;font-weight:800;text-align:center}
+#macau-special-panel .smp-ma-settings button{min-height:36px;padding:6px 10px;border:1px solid #2c4462;border-radius:8px;background:#13263e;color:#dce8f6;font-size:11px;font-weight:800;white-space:nowrap}
+#macau-special-panel .smp-ma-settings button[data-smp-ma-action="apply"]{border-color:#4aaddb;background:#236d9d;color:#fff}
+#macau-special-panel .smp-ma-status{flex:1;min-width:230px;color:#8fa8c0;font-size:10px;line-height:1.45}
+#macau-special-panel .smp-ma-status.smp-error{color:#ffaaa8}
 #macau-special-panel .smp-sim-bar,
 #macau-special-panel .smp-history-bar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:8px;padding:8px 10px;border:1px solid #29415b;border-radius:10px;background:#0a1a2c}
 #macau-special-panel .smp-sim-bar>span{margin-right:auto;color:#8fa8c0;font-size:10px;line-height:1.45}
@@ -403,6 +413,12 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-chart-pick-bar>b{display:block;margin-bottom:7px;font-size:13px}
  #macau-special-panel .smp-picks{flex-wrap:wrap;overflow-x:visible}
  #macau-special-panel .smp-picks button{flex:1;min-width:calc(50% - 3px)}
+ #macau-special-panel .smp-ma-settings{align-items:stretch}
+ #macau-special-panel .smp-ma-settings>b{width:100%;align-self:center}
+ #macau-special-panel .smp-ma-field{flex:1;justify-content:space-between;min-width:calc(33.333% - 5px)}
+ #macau-special-panel .smp-ma-field input{width:100%;min-width:0;min-height:44px}
+ #macau-special-panel .smp-ma-settings button{min-height:44px;flex:1}
+ #macau-special-panel .smp-ma-status{flex-basis:100%;min-width:0}
  #macau-special-panel .smp-sim-bar>span{width:100%;margin-right:0}
  #macau-special-panel .smp-sim-bar button{min-height:44px;flex:1}
  #macau-special-panel .smp-history-bar{align-items:stretch}
@@ -506,6 +522,15 @@ Error generating stack: `+e.message+`
         <button type="button" data-smp-lower="omission" aria-pressed="false">强度／遗漏</button>
         <small id="smp-indicator-note">BOLL：紫上轨 · 黄中轨 · 蓝下轨</small>
       </div>
+      <div class="smp-ma-settings" id="smp-ma-settings" role="group" aria-label="均线显示参数" hidden>
+        <b>MA显示参数</b>
+        <label class="smp-ma-field">快线<input id="smp-ma-fast" type="number" min="2" max="1500" step="1" inputmode="numeric" value="5" aria-label="MA快线周期"></label>
+        <label class="smp-ma-field">中线<input id="smp-ma-mid" type="number" min="2" max="1500" step="1" inputmode="numeric" value="10" aria-label="MA中线周期"></label>
+        <label class="smp-ma-field">慢线<input id="smp-ma-slow" type="number" min="2" max="1500" step="1" inputmode="numeric" value="20" aria-label="MA慢线周期"></label>
+        <button type="button" data-smp-ma-action="apply">应用</button>
+        <button type="button" data-smp-ma-action="reset">恢复5／10／20</button>
+        <output class="smp-ma-status" id="smp-ma-status" role="status" aria-live="polite">只改变图表均线，不改变专业研判与前推成绩。</output>
+      </div>
       <div class="smp-sim-bar" aria-label="下一期图形模拟">
         <span>下一期图形模拟 · 只改变K线预览，不进入研判、排名或前推成绩</span>
         <b id="smp-sim-target">模拟下一期</b>
@@ -580,7 +605,7 @@ Error generating stack: `+e.message+`
       </div>
     </section>
   </div>
-  <p class="smp-note">口径：家禽＝牛、马、羊、鸡、狗、猪；野兽＝鼠、虎、兔、龙、蛇、猴。1–24为小，25–49为大；奇数为单，偶数为双。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
+  <p class="smp-note">口径：家禽＝牛、马、羊、鸡、狗、猪；野兽＝鼠、虎、兔、龙、蛇、猴。1–24为小，25–49为大；奇数为单，偶数为双。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。用户自定义MA周期只改变图表显示，专业研判与严格前推继续固定使用MA5／10／20。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
 </section>
 <script id="macau-special-binary-script">
 (function(){
@@ -600,7 +625,8 @@ Error generating stack: `+e.message+`
     size:{title:"大小",select:"选择大小",values:["大","小"]},
     parity:{title:"单双",select:"选择单双",values:["单","双"]}
   };
-  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
+  var DEFAULT_MA=[5,10,20];
+  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
   var specials=[];
   var skipped=0;
   var chartFrame=0;
@@ -611,6 +637,25 @@ Error generating stack: `+e.message+`
   function pad(value){return String(value).padStart(2,"0")}
   function percent(value){return Number.isFinite(value)?(value*100).toFixed(2)+"%":"—"}
   function signed(value){if(!Number.isFinite(value))return "—";return (value>=0?"+":"")+(value*100).toFixed(2)+"点"}
+  function validMaPeriods(values){
+    if(!Array.isArray(values)||values.length!==3)return null;
+    var periods=values.map(Number);
+    if(periods.some(function(value){return !Number.isInteger(value)||value<2||value>1500})||!(periods[0]<periods[1]&&periods[1]<periods[2]))return null;
+    return periods
+  }
+  function maLabel(){return state.maPeriods.join("／")}
+  function saveMaPeriods(){try{localStorage.setItem("macau-special-ma-periods",JSON.stringify(state.maPeriods))}catch(error){}}
+  function renderMaSettings(message,isError){
+    var box=qs("#smp-ma-settings"),inputs=[qs("#smp-ma-fast"),qs("#smp-ma-mid"),qs("#smp-ma-slow")],status=qs("#smp-ma-status");
+    if(box)box.hidden=state.overlay!=="ma";
+    inputs.forEach(function(input,index){if(input){if(!isError)input.value=String(state.maPeriods[index]);input.setAttribute("aria-invalid",isError?"true":"false")}});
+    if(status){status.classList.toggle("smp-error",!!isError);status.textContent=message||("当前图表MA "+maLabel()+"；只改变图形，不改变专业研判与前推成绩。")} 
+  }
+  function applyMaPeriods(values,reset){
+    var periods=validMaPeriods(values);
+    if(!periods){renderMaSettings("请输入2–1500的递增整数，例如5／10／20。",true);return false}
+    state.maPeriods=periods;saveMaPeriods();renderModeControls();renderMaSettings((reset?"已恢复默认":"已应用")+" MA "+maLabel()+"；专业研判仍固定MA5／10／20。",false);scheduleChart(false);return true
+  }
   function normalizeDate(value){
     var text=String(value==null?"":value).trim();
     var match=text.match(/(20\d{2})[-\/.年](\d{1,2})[-\/.月](\d{1,2})/);
@@ -894,7 +939,8 @@ Error generating stack: `+e.message+`
     qs("#smp-ranking-title").textContent=MODE[state.mode].title+"窗口排名";
     var visibleCount=currentWindow().length;
     qs("#smp-window-label").textContent=state.windowSize==="all"?"前缀全库 "+visibleCount+"期":"近"+visibleCount+"期";
-    qs("#smp-indicator-note").textContent=state.overlay==="boll"?"BOLL：紫上轨 · 黄中轨 · 蓝下轨":"MA：黄5期 · 紫10期 · 蓝20期"
+    qs("#smp-indicator-note").textContent=state.overlay==="boll"?"BOLL：紫上轨 · 黄中轨 · 蓝下轨":"MA：黄"+state.maPeriods[0]+"期 · 紫"+state.maPeriods[1]+"期 · 蓝"+state.maPeriods[2]+"期（仅图形）";
+    renderMaSettings()
   }
   function renderCategories(){
     var grid=qs("#smp-category-grid"),selected=stateValue();
@@ -984,7 +1030,7 @@ Error generating stack: `+e.message+`
   function chartData(){
     var value=stateValue(),rows=prefixRows(),actualSeries=buildSeriesForRows(rows,state.mode,value),actualCount=actualSeries.length,simulation=simulatedRow(actualSeries,state.mode,value),fullSeries=simulation?actualSeries.concat([simulation]):actualSeries;
     var fullCloses=fullSeries.map(function(row){return row.close}),start=state.windowSize==="all"?0:Math.max(0,actualCount-Math.min(Number(state.windowSize),actualCount));
-    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,5).slice(start),ma10:movingAverage(fullCloses,10).slice(start),ma20:movingAverage(fullCloses,20).slice(start),mac:macd(fullCloses).slice(start),simulated:!!simulation,actualCount:actualCount}
+    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,state.maPeriods[0]).slice(start),ma10:movingAverage(fullCloses,state.maPeriods[1]).slice(start),ma20:movingAverage(fullCloses,state.maPeriods[2]).slice(start),maPeriods:state.maPeriods.slice(),mac:macd(fullCloses).slice(start),simulated:!!simulation,actualCount:actualCount}
   }
   function fullAnalysisData(mode,value){var series=buildSeriesForRows(prefixRows(),mode,value),closes=series.map(function(row){return row.close});return {value:value,series:series,closes:closes,boll:bollinger(closes),mac:macd(closes)}}
   function drawChart(scrollLatest){
@@ -1009,9 +1055,9 @@ Error generating stack: `+e.message+`
     if(low<0&&high>0){var zeroY=yFor(0);ctx.beginPath();ctx.moveTo(left,zeroY);ctx.lineTo(cssWidth-right,zeroY);ctx.strokeStyle="#f7c84388";ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([])}
     if(longWindow){
       line(ctx,actualSeries,yFor,xFor,"#f7c843",1.7,"close");
-      if(data.simulated&&series.length>1){var lastActualIndex=series.length-2;ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle="#ffe066";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xFor(lastActualIndex),yFor(series[lastActualIndex].close));ctx.lineTo(xFor(series.length-1),yFor(series[series.length-1].close));ctx.stroke();ctx.restore()}
+      if(data.simulated&&series.length>1){var lastActualIndex=series.length-2,simulatedPoint=series[series.length-1],simulatedColor=simulatedPoint.hit?"#ef5350":"#18a66a";ctx.save();ctx.strokeStyle=simulatedColor;ctx.fillStyle=simulatedColor;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xFor(lastActualIndex),yFor(series[lastActualIndex].close));ctx.lineTo(xFor(series.length-1),yFor(simulatedPoint.close));ctx.stroke();ctx.beginPath();ctx.arc(xFor(series.length-1),yFor(simulatedPoint.close),3,0,Math.PI*2);ctx.fill();ctx.restore()}
     }else{
-      series.forEach(function(row,index){var x=xFor(index),color=row.hit?"#ef5350":"#18a66a",open=yFor(row.open),close=yFor(row.close),barWidth=Math.max(2,step*.56),barTop=Math.min(open,close),barHeight=Math.max(1,Math.abs(close-open));ctx.fillStyle=row.simulated?color+"99":color;ctx.fillRect(x-barWidth/2,barTop,barWidth,barHeight);if(row.simulated){ctx.save();ctx.setLineDash([3,2]);ctx.strokeStyle="#ffe066";ctx.lineWidth=1.5;ctx.strokeRect(x-barWidth/2-.5,barTop-.5,barWidth+1,barHeight+1);ctx.restore();ctx.fillStyle="#ffe066";ctx.textAlign="center";ctx.fillText("模拟",x,top+11)}})
+      series.forEach(function(row,index){var x=xFor(index),color=row.hit?"#ef5350":"#18a66a",open=yFor(row.open),close=yFor(row.close),barWidth=Math.max(2,step*.56),barTop=Math.min(open,close),barHeight=Math.max(1,Math.abs(close-open));ctx.fillStyle=row.simulated?color+"b3":color;ctx.fillRect(x-barWidth/2,barTop,barWidth,barHeight);if(row.simulated){ctx.fillStyle="#9fb3c8";ctx.textAlign="center";ctx.fillText("模拟",x,top+11)}})
     }
     if(state.overlay==="boll"){
       ctx.beginPath();
@@ -1037,7 +1083,7 @@ Error generating stack: `+e.message+`
     ctx.fillStyle="#7890ac";ctx.textAlign="center";
     var labelCount=Math.min(10,series.length);
     for(var tick=0;tick<labelCount;tick+=1){var itemIndex=Math.round(tick*(series.length-1)/Math.max(1,labelCount-1)),x=xFor(itemIndex);ctx.save();ctx.translate(x,cssHeight-17);ctx.rotate(-.53);ctx.fillText(series[itemIndex].label,0,0);ctx.restore()}
-    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"三均线")+"与"+(state.lower==="macd"?"MACD":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
+    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"MA"+maLabel())+"与"+(state.lower==="macd"?"MACD":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
     canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
     qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名或前推成绩。":"；技术指标只描述历史。") ;
     if(scrollLatest&&series.length>60)requestAnimationFrame(function(){scroll.scrollLeft=Math.max(0,scroll.scrollWidth-scroll.clientWidth)})
@@ -1081,6 +1127,8 @@ Error generating stack: `+e.message+`
     qsa("[data-smp-view]").forEach(function(button){button.addEventListener("click",function(){setView(button.getAttribute("data-smp-view"))})});
     qsa("[data-smp-mode]").forEach(function(button){button.addEventListener("click",function(){state.mode=button.getAttribute("data-smp-mode");stateValue();state.simulation=null;state.hoverIndex=null;state.locked=false;renderAll(true)})});
     qsa("[data-smp-overlay]").forEach(function(button){button.addEventListener("click",function(){state.overlay=button.getAttribute("data-smp-overlay");renderAll(false)})});
+    qsa("[data-smp-ma-action]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-ma-action");if(action==="reset")applyMaPeriods(DEFAULT_MA.slice(),true);else applyMaPeriods([qs("#smp-ma-fast").value,qs("#smp-ma-mid").value,qs("#smp-ma-slow").value],false)})});
+    qsa("#smp-ma-settings input").forEach(function(input){input.addEventListener("keydown",function(event){if(event.key==="Enter"){event.preventDefault();qs('[data-smp-ma-action="apply"]').click()}})});
     qsa("[data-smp-lower]").forEach(function(button){button.addEventListener("click",function(){state.lower=button.getAttribute("data-smp-lower");renderAll(false);if(state.hoverIndex!=null)renderTip(state.hoverIndex)})});
     var mobileTabs=qsa("[data-smp-mobile-view]");
     mobileTabs.forEach(function(button,index){
@@ -1130,6 +1178,7 @@ Error generating stack: `+e.message+`
     bind();
     var saved="main",requested=false;
     try{saved=localStorage.getItem("macau-special-view")||"main"}catch(error){}
+    try{var savedMa=validMaPeriods(JSON.parse(localStorage.getItem("macau-special-ma-periods")||"null"));if(savedMa)state.maPeriods=savedMa}catch(error){}
     try{requested=new URLSearchParams(location.search).get("view")==="special"||location.hash==="#special"}catch(error){}
     var desiredView=requested||saved==="special"?"special":"main";
     try{
