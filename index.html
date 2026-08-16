@@ -291,6 +291,34 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-history-bar button,
 #macau-special-panel .smp-history-bar select{min-height:36px;padding:6px 9px;border:1px solid #2c4462;border-radius:8px;background:#13263e;color:#dce8f6;font-size:11px;white-space:nowrap}
 #macau-special-panel .smp-sim-bar button.smp-on{border-color:var(--smp-gold);background:#6d5718;color:#fff1a8;box-shadow:inset 0 0 0 1px #f7c84355}
+#macau-special-panel #smp-expert-toggle.smp-on{border-color:#52d2ed;background:#0d4f68;color:#dffaff;box-shadow:inset 0 0 0 1px #52d2ed55}
+#macau-special-panel .smp-expert-legend{transition:opacity .18s ease}
+#macau-special-panel .smp-expert-legend.smp-off{opacity:.32}
+#macau-special-panel .smp-expert-legend b{display:inline-block;margin-right:4px;font-size:12px}
+#macau-special-panel .smp-expert-legend.smp-opportunity b{color:#52d2ed}
+#macau-special-panel .smp-expert-legend.smp-stop b{color:#ffad66}
+#macau-special-panel .smp-expert-legend.smp-risk b{color:#f472b6}
+#macau-special-panel .smp-expert-card{display:grid;grid-template-columns:minmax(210px,.72fr) minmax(280px,1.35fr) minmax(220px,.9fr);align-items:stretch;gap:9px;margin-bottom:8px;padding:10px;border:1px solid #29415b;border-top:2px solid #91a8c1;border-radius:12px;background:linear-gradient(135deg,#0a1a2c,#0b2034);transition:border-color .18s ease,opacity .18s ease}
+#macau-special-panel .smp-expert-card.smp-opportunity{border-top-color:#52d2ed}
+#macau-special-panel .smp-expert-card.smp-stop{border-top-color:#ffad66}
+#macau-special-panel .smp-expert-card.smp-risk{border-top-color:#f472b6}
+#macau-special-panel .smp-expert-card.smp-off{opacity:.72;grid-template-columns:1fr}
+#macau-special-panel .smp-expert-card.smp-off .smp-expert-explain,
+#macau-special-panel .smp-expert-card.smp-off .smp-expert-rules{display:none}
+#macau-special-panel .smp-expert-verdict,
+#macau-special-panel .smp-expert-explain,
+#macau-special-panel .smp-expert-rules{min-width:0;padding:9px 10px;border:1px solid #203852;border-radius:9px;background:#081725}
+#macau-special-panel .smp-expert-verdict span,
+#macau-special-panel .smp-expert-verdict small{display:block;color:#8299b3;font-size:9px;line-height:1.45}
+#macau-special-panel .smp-expert-verdict strong{display:block;margin:5px 0;color:#b9c9da;font-size:17px;line-height:1.3}
+#macau-special-panel .smp-expert-card.smp-opportunity .smp-expert-verdict strong{color:#70e7f3}
+#macau-special-panel .smp-expert-card.smp-stop .smp-expert-verdict strong{color:#ffc18a}
+#macau-special-panel .smp-expert-card.smp-risk .smp-expert-verdict strong{color:#ff9bd0}
+#macau-special-panel .smp-expert-explain b{display:block;color:#dce8f6;font-size:11px;line-height:1.4}
+#macau-special-panel .smp-expert-explain p{margin:5px 0 0;color:#9db1c8;font-size:10px;line-height:1.55}
+#macau-special-panel .smp-expert-rules{display:flex;flex-direction:column;justify-content:center;gap:6px}
+#macau-special-panel .smp-expert-rules span{color:#91a8c1;font-size:10px;line-height:1.45}
+#macau-special-panel .smp-expert-rules b{color:#cbd9e8}
 #macau-special-panel .smp-history-bar{margin:0}
 #macau-special-panel .smp-history-bar select{flex:1;min-width:210px}
 #macau-special-panel .smp-history-state{margin-left:auto;padding:5px 8px;border:1px solid #246449;border-radius:999px;background:#0d382b;color:#9be2bf;font-size:10px;font-weight:800;white-space:nowrap}
@@ -421,6 +449,10 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-ma-status{flex-basis:100%;min-width:0}
  #macau-special-panel .smp-sim-bar>span{width:100%;margin-right:0}
  #macau-special-panel .smp-sim-bar button{min-height:44px;flex:1}
+ #macau-special-panel #smp-expert-toggle{min-height:44px}
+ #macau-special-panel .smp-expert-card{grid-template-columns:1fr;padding:8px}
+ #macau-special-panel .smp-expert-verdict strong{font-size:16px}
+ #macau-special-panel .smp-expert-explain p{font-size:11px}
  #macau-special-panel .smp-history-bar{align-items:stretch}
  #macau-special-panel .smp-history-bar>b{width:100%;align-self:center}
  #macau-special-panel .smp-history-bar button{min-height:44px;flex:1}
@@ -503,6 +535,7 @@ Error generating stack: `+e.message+`
           <option value="700">最近700期</option>
           <option value="all">全库</option>
         </select>
+        <button type="button" id="smp-expert-toggle" class="smp-on" data-smp-expert aria-pressed="true" aria-controls="smp-expert-card smp-chart">专家提示：开</button>
         <button type="button" id="smp-fullscreen" aria-pressed="false">大图／横屏</button>
       </div>
     </div>
@@ -510,6 +543,9 @@ Error generating stack: `+e.message+`
       <span><i class="smp-red"></i>实际出现</span>
       <span><i class="smp-green"></i>未出现</span>
       <span id="smp-window-label">近100期</span>
+      <span class="smp-expert-legend smp-opportunity"><b>▲</b>机会观察点</span>
+      <span class="smp-expert-legend smp-stop"><b>■</b>停止观察点</span>
+      <span class="smp-expert-legend smp-risk"><b>▼</b>风险提醒点</span>
     </div>
     <div class="smp-chart-frame">
       <div class="smp-indicator-bar" aria-label="图表指标">
@@ -539,6 +575,21 @@ Error generating stack: `+e.message+`
         <button type="button" data-smp-sim="clear" disabled>清除模拟</button>
         <output id="smp-sim-status" role="status" aria-live="polite">未启用模拟</output>
       </div>
+      <aside class="smp-expert-card smp-wait" id="smp-expert-card" aria-live="polite" aria-label="系统专家技术形态提示">
+        <div class="smp-expert-verdict">
+          <span>坚爷系统专家提示 · 技术形态观察点（非投注指令）</span>
+          <strong id="smp-expert-status">○ 等待确认</strong>
+          <small id="smp-expert-grade">历史验证：正在计算</small>
+        </div>
+        <div class="smp-expert-explain">
+          <b id="smp-expert-target">等待真实数据</b>
+          <p id="smp-expert-reason">固定BOLL20、MA5／10／20与MACD正在执行严格因果识别。</p>
+        </div>
+        <div class="smp-expert-rules">
+          <span id="smp-expert-trigger"><b>机会：</b>等待趋势与动量同向</span>
+          <span id="smp-expert-stop"><b>停止：</b>共振失效或风险条件触发</span>
+        </div>
+      </aside>
       <div class="smp-chart-scroll" id="smp-chart-scroll">
         <div class="smp-chart-stage" id="smp-chart-stage"><canvas id="smp-chart" role="img" tabindex="0" aria-label="特码二分类历史校准K线图"></canvas></div>
       </div>
@@ -626,10 +677,11 @@ Error generating stack: `+e.message+`
     parity:{title:"单双",select:"选择单双",values:["单","双"]}
   };
   var DEFAULT_MA=[5,10,20];
-  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
+  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),expertHints:true,mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
   var specials=[];
   var skipped=0;
   var chartFrame=0;
+  var expertCache={key:"",value:null};
   var rootOriginal={hidden:false,aria:null,ready:false};
   function qs(selector,root){return (root||document).querySelector(selector)}
   function qsa(selector,root){return Array.prototype.slice.call((root||document).querySelectorAll(selector))}
@@ -702,12 +754,13 @@ Error generating stack: `+e.message+`
     var parts=date.split("-").map(Number),value=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]+days));
     return value.getUTCFullYear()+"-"+pad(value.getUTCMonth()+1)+"-"+pad(value.getUTCDate())
   }
-  function nextMeta(){
-    var current=latestAtCutoff();if(!current)return {label:"下一期",date:""};
+  function deriveNextMeta(current){
+    if(!current)return {label:"下一期",date:""};
     var date=addDays(current.date,1),match=String(current.label).match(/^(20\d{2})-(\d{3})$/),label="下一期";
     if(match){var nextYear=date?date.slice(0,4):match[1],nextNumber=nextYear!==match[1]?1:Number(match[2])+1;label=nextYear+"-"+String(nextNumber).padStart(3,"0")}
     return {label:label,date:date}
   }
+  function nextMeta(){return deriveNextMeta(latestAtCutoff())}
   function simulationAvailable(){var meta=nextMeta();return !!meta.date&&(state.mode!=="group"||groupCount(stateValue(),meta.date)!=null)}
   function omission(value,mode){
     var rows=prefixRows(),miss=0;
@@ -889,6 +942,91 @@ Error generating stack: `+e.message+`
     if(shadow)return {code:"H-S",label:"H-S影子候选 · 短窗未确认",candidate:false,shadow:true,note:"全库存在正增量，但短窗失效；只可等待独立前推确认"};
     return {code:"H-C",label:"H-C低验证 · 仅观察",candidate:false,note:"低验证，仅观察；不得据此提高开奖概率判断"}
   }
+  function expertRiskInfo(snapshot,phase){
+    if(!snapshot)return null;
+    if(snapshot.topDivergence)return {key:"TOP_DIVERGENCE",label:"潜在顶背离",hard:true};
+    if(snapshot.maDead||snapshot.macdDead)return {key:"DEAD_CROSS",label:(snapshot.maDead&&snapshot.macdDead?"MA与MACD死叉":"技术死叉"),hard:true};
+    if(snapshot.percentB>1)return {key:"UPPER_EXHAUSTION",label:"上轨外过热",hard:false};
+    if(phase==="ACTIVE"&&snapshot.widthState==="收缩"&&snapshot.histDelta<0)return {key:"CONTRACTION_FADE",label:"通道收缩且动量减弱",hard:false};
+    if(snapshot.direction===-1)return {key:"NEGATIVE_CONSENSUS",label:"趋势与MACD负向共振",hard:true};
+    return null
+  }
+  function expertStopInfo(snapshot){
+    if(snapshot.topDivergence)return {code:"TOP_DIVERGENCE",label:"顶背离风险触发"};
+    if(snapshot.maDead||snapshot.macdDead)return {code:"DEAD_CROSS",label:(snapshot.maDead&&snapshot.macdDead?"MA与MACD死叉触发":"技术死叉触发")};
+    if(snapshot.direction===-1)return {code:"NEGATIVE_REVERSAL",label:"趋势与MACD转为负向共振"};
+    return {code:"TWO_BAR_LOSS",label:"机会条件连续两柱未恢复"}
+  }
+  function expertReasons(type,code,snapshot){
+    if(type==="opportunity")return ["趋势族+1与MACD动量+1同向",snapshot.maState,snapshot.bollState,snapshot.histState];
+    if(type==="stop"){var stopped=expertStopInfo(snapshot);return [stopped.label,snapshot.maState,snapshot.macdEvent,snapshot.bollState]}
+    var labels={TOP_DIVERGENCE:"潜在顶背离",DEAD_CROSS:"技术死叉",UPPER_EXHAUSTION:"上轨外过热",CONTRACTION_FADE:"通道收缩且动量减弱",NEGATIVE_CONSENSUS:"趋势与MACD负向共振"};
+    return [labels[code]||code,snapshot.zone,snapshot.histState,snapshot.divergence]
+  }
+  function expertMarker(index,row,type,code,snapshot,phaseAfter){
+    var next=deriveNextMeta(row);
+    return {index:index,label:row.label,nextLabel:next.label,nextDate:next.date,type:type,code:code,reasons:expertReasons(type,code,snapshot),phaseAfter:phaseAfter,technical:{direction:snapshot.direction,tr:snapshot.tr,momentumVote:snapshot.momentumVote,structure:snapshot.structure,percentB:snapshot.percentB,widthState:snapshot.widthState,histState:snapshot.histState}}
+  }
+  function expertSignalsForRows(rows,mode,value){
+    var series=buildSeriesForRows(rows,mode,value),closes=series.map(function(row){return row.close}),boll=bollinger(closes),mac=macd(closes),events=[],phase="IDLE",weakStreak=0,lastRiskIndex=-Infinity,previousRiskKey=null;
+    for(var index=59;index<series.length;index+=1){
+      var snapshot=technicalAt(series,boll,mac,index);if(!snapshot)continue;
+      var opportunity=snapshot.direction===1&&snapshot.trendVote===1&&snapshot.momentumVote===1&&!snapshot.topDivergence&&!snapshot.maDead&&!snapshot.macdDead;
+      var risk=expertRiskInfo(snapshot,phase),event=null;
+      if(phase==="ACTIVE"){
+        var hardStop=snapshot.direction===-1||snapshot.maDead||snapshot.macdDead||snapshot.topDivergence;
+        if(hardStop){var hard=expertStopInfo(snapshot);phase="IDLE";weakStreak=0;event=expertMarker(index,rows[index],"stop",hard.code,snapshot,phase)}
+        else if(opportunity)weakStreak=0;
+        else{weakStreak+=1;if(weakStreak>=2){phase="IDLE";weakStreak=0;event=expertMarker(index,rows[index],"stop","TWO_BAR_LOSS",snapshot,phase)}}
+      }else{
+        weakStreak=0;
+        if(opportunity){phase="ACTIVE";event=expertMarker(index,rows[index],"opportunity","MULTI_TECH_CONSENSUS",snapshot,phase)}
+      }
+      if(!event&&risk&&risk.key!==previousRiskKey&&index-lastRiskIndex>=3){event=expertMarker(index,rows[index],"risk",risk.key,snapshot,phase);lastRiskIndex=index}
+      previousRiskKey=risk?risk.key:null;
+      if(event)events.push(event)
+    }
+    var latestIndex=series.length-1,latestSnapshot=latestIndex>=0?technicalAt(series,boll,mac,latestIndex):null,latestRisk=latestSnapshot?expertRiskInfo(latestSnapshot,phase):null;
+    return {events:events,phase:phase,weakStreak:weakStreak,latestIndex:latestIndex,latestSnapshot:latestSnapshot,latestRisk:latestRisk,seriesLength:series.length}
+  }
+  function expertSignalData(mode,value){
+    var key=specials.length+"|"+state.cutoffIndex+"|"+mode+"|"+value;
+    if(expertCache.key===key&&expertCache.value)return expertCache.value;
+    var signals=expertSignalsForRows(prefixRows(),mode,value),forward=walkForward(mode,value),grade=validationGrade(forward.results);
+    expertCache={key:key,value:{events:signals.events,phase:signals.phase,weakStreak:signals.weakStreak,latestIndex:signals.latestIndex,latestSnapshot:signals.latestSnapshot,latestRisk:signals.latestRisk,seriesLength:signals.seriesLength,grade:grade}};
+    return expertCache.value
+  }
+  function lastExpertEvent(events,type){
+    for(var index=events.length-1;index>=0;index-=1)if(events[index].type===type)return events[index];
+    return null
+  }
+  function renderExpertHint(){
+    var card=qs("#smp-expert-card"),button=qs("#smp-expert-toggle");if(!card||!button)return;
+    button.classList.toggle("smp-on",state.expertHints);button.setAttribute("aria-pressed",state.expertHints?"true":"false");button.textContent="专家提示："+(state.expertHints?"开":"关");
+    qsa(".smp-expert-legend").forEach(function(item){item.classList.toggle("smp-off",!state.expertHints)});
+    card.classList.toggle("smp-off",!state.expertHints);
+    if(!state.expertHints){card.className="smp-expert-card smp-off smp-wait";qs("#smp-expert-status").textContent="○ 专家提示已关闭";qs("#smp-expert-grade").textContent="打开后显示因果技术形态观察点";return}
+    var value=stateValue(),data=expertSignalData(state.mode,value),snapshot=data.latestSnapshot,row=latestAtCutoff();
+    if(!snapshot||data.latestIndex<59){card.className="smp-expert-card smp-wait";qs("#smp-expert-status").textContent="○ 样本不足";qs("#smp-expert-grade").textContent="至少需要60期真实前缀数据";qs("#smp-expert-target").textContent=value+" · 截至"+(row?row.label:"—");qs("#smp-expert-reason").textContent="尚未达到固定技术规则的60期预热门槛。";qs("#smp-expert-trigger").innerHTML="<b>机会：</b>等待预热完成";qs("#smp-expert-stop").innerHTML="<b>停止：</b>尚无已激活机会";return}
+    var latestEvent=data.events.length?data.events[data.events.length-1]:null,currentEvent=latestEvent&&latestEvent.index===data.latestIndex?latestEvent:null,lastOpportunity=lastExpertEvent(data.events,"opportunity"),lastStop=lastExpertEvent(data.events,"stop"),lastRisk=lastExpertEvent(data.events,"risk"),tone="wait",status="○ 等待确认",reason;
+    if(data.phase==="ACTIVE"){
+      tone="opportunity";status="▲ 机会观察中"+(data.weakStreak?" · 条件减弱":"");
+      reason="趋势与MACD机会状态仍在"+(data.latestRisk?"，同时出现“"+data.latestRisk.label+"”风险提醒":"")+"；"+snapshot.maState+"，"+snapshot.bollState+"，"+snapshot.histState+"。"
+    }else if(currentEvent&&currentEvent.type==="stop"){
+      tone="stop";status="■ 本期停止观察点";reason=currentEvent.reasons.join("；")+"。"
+    }else if(snapshot.direction===-1){
+      tone="risk";status="▼ 风险回避中";reason=(data.latestRisk?data.latestRisk.label:"负向共振")+"；"+snapshot.maState+"，"+snapshot.bollState+"，"+snapshot.histState+"。"
+    }else{
+      reason="趋势族 "+(snapshot.trendVote>=0?"+":"")+snapshot.trendVote+" 与MACD动量族 "+(snapshot.momentumVote>=0?"+":"")+snapshot.momentumVote+" 尚未形成同向机会；"+snapshot.bollState+"。"
+    }
+    card.className="smp-expert-card smp-"+tone;
+    qs("#smp-expert-status").textContent=status;
+    qs("#smp-expert-grade").textContent="历史验证："+data.grade.label+" · 形态提示不等于命中概率";
+    qs("#smp-expert-target").textContent=value+" · 截至"+row.label+" · 固定MA5／10／20"+(state.simulation?" · 模拟不参与":"");
+    qs("#smp-expert-reason").textContent=reason;
+    qs("#smp-expert-trigger").innerHTML="<b>最近机会：</b>"+(lastOpportunity?safeText(lastOpportunity.label)+"收柱后 → "+safeText(lastOpportunity.nextLabel):"尚未触发");
+    qs("#smp-expert-stop").innerHTML="<b>最近停止／风险：</b>"+(lastStop?safeText(lastStop.label)+"停止":"尚无停止点")+(lastRisk?" · "+safeText(lastRisk.label)+"风险":"")
+  }
   function setView(view){
     var root=qs("#macau-kline-inline-root"),panel=qs("#macau-special-panel");
     state.view=view==="special"?"special":"main";
@@ -1029,10 +1167,22 @@ Error generating stack: `+e.message+`
   }
   function chartData(){
     var value=stateValue(),rows=prefixRows(),actualSeries=buildSeriesForRows(rows,state.mode,value),actualCount=actualSeries.length,simulation=simulatedRow(actualSeries,state.mode,value),fullSeries=simulation?actualSeries.concat([simulation]):actualSeries;
-    var fullCloses=fullSeries.map(function(row){return row.close}),start=state.windowSize==="all"?0:Math.max(0,actualCount-Math.min(Number(state.windowSize),actualCount));
-    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,state.maPeriods[0]).slice(start),ma10:movingAverage(fullCloses,state.maPeriods[1]).slice(start),ma20:movingAverage(fullCloses,state.maPeriods[2]).slice(start),maPeriods:state.maPeriods.slice(),mac:macd(fullCloses).slice(start),simulated:!!simulation,actualCount:actualCount}
+    var fullCloses=fullSeries.map(function(row){return row.close}),start=state.windowSize==="all"?0:Math.max(0,actualCount-Math.min(Number(state.windowSize),actualCount)),expert=expertSignalData(state.mode,value),eventByIndex=Object.create(null);
+    expert.events.forEach(function(event){eventByIndex[event.index]=event});
+    var fullMarkers=actualSeries.map(function(row,index){return eventByIndex[index]||null});if(simulation)fullMarkers.push(null);
+    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,state.maPeriods[0]).slice(start),ma10:movingAverage(fullCloses,state.maPeriods[1]).slice(start),ma20:movingAverage(fullCloses,state.maPeriods[2]).slice(start),maPeriods:state.maPeriods.slice(),mac:macd(fullCloses).slice(start),expertMarkers:fullMarkers.slice(start),startIndex:start,simulated:!!simulation,actualCount:actualCount}
   }
   function fullAnalysisData(mode,value){var series=buildSeriesForRows(prefixRows(),mode,value),closes=series.map(function(row){return row.close});return {value:value,series:series,closes:closes,boll:bollinger(closes),mac:macd(closes)}}
+  function drawExpertMarker(ctx,event,row,x,yFor,top,plotBottom,step){
+    var opportunity=event.type==="opportunity",stop=event.type==="stop",color=opportunity?"#52d2ed":stop?"#ffad66":"#f472b6",size=Math.max(3,Math.min(6,step*.72)),highY=yFor(row.high),lowY=yFor(row.low),anchor=opportunity?Math.min(plotBottom-10,lowY+12):Math.max(top+10,highY-12),label=opportunity?"机会":stop?"停止":"风险";
+    ctx.save();ctx.fillStyle=color;ctx.strokeStyle="#07111f";ctx.lineWidth=1.4;ctx.shadowColor=color;ctx.shadowBlur=4;ctx.beginPath();
+    if(opportunity){ctx.moveTo(x,anchor-size);ctx.lineTo(x-size,anchor+size*.75);ctx.lineTo(x+size,anchor+size*.75);ctx.closePath()}
+    else if(stop){ctx.rect(x-size*.72,anchor-size*.72,size*1.44,size*1.44)}
+    else{ctx.moveTo(x,anchor+size);ctx.lineTo(x-size,anchor-size*.75);ctx.lineTo(x+size,anchor-size*.75);ctx.closePath()}
+    ctx.fill();ctx.stroke();ctx.shadowBlur=0;
+    if(step>=16){ctx.font="800 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,opportunity?Math.min(plotBottom-3,anchor+size+8):Math.max(top+3,anchor-size-7))}
+    ctx.restore()
+  }
   function drawChart(scrollLatest){
     if(state.view!=="special")return;
     var canvas=qs("#smp-chart"),scroll=qs("#smp-chart-scroll"),stage=qs("#smp-chart-stage"),data=chartData(),series=data.series;
@@ -1068,6 +1218,13 @@ Error generating stack: `+e.message+`
     }else{
       line(ctx,data.ma5,yFor,xFor,"#f7c843",1.8);line(ctx,data.ma10,yFor,xFor,"#a78bfa",1.2);line(ctx,data.ma20,yFor,xFor,"#38bdf8",1.2)
     }
+    if(state.expertHints&&data.expertMarkers){
+      var markerItems=data.expertMarkers.map(function(event,index){return event?{event:event,index:index,x:xFor(index)}:null}).filter(Boolean);
+      if(step<16){var kept=[];for(var mi=markerItems.length-1;mi>=0;mi-=1){var candidate=markerItems[mi],near=kept.some(function(item){return Math.abs(item.x-candidate.x)<18});if(!near)kept.push(candidate)}markerItems=kept.reverse()}
+      ctx.save();ctx.beginPath();ctx.rect(left,top-2,cssWidth-left-right,plotBottom-top+4);ctx.clip();
+      markerItems.forEach(function(item){drawExpertMarker(ctx,item.event,series[item.index],item.x,yFor,top,plotBottom,step)});
+      ctx.restore()
+    }
     if(state.lower==="macd"){
       var maxMagnitude=Math.max.apply(null,[.01].concat(data.mac.reduce(function(out,row){out.push(Math.abs(row.hist),Math.abs(row.dif),Math.abs(row.dea));return out},[]))),base=lowerTop+lowerHeight/2,mapMacd=function(value){return base-value/maxMagnitude*(lowerHeight*.43)};
       ctx.strokeStyle="#334966";ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(cssWidth-right,base);ctx.stroke();
@@ -1084,8 +1241,8 @@ Error generating stack: `+e.message+`
     var labelCount=Math.min(10,series.length);
     for(var tick=0;tick<labelCount;tick+=1){var itemIndex=Math.round(tick*(series.length-1)/Math.max(1,labelCount-1)),x=xFor(itemIndex);ctx.save();ctx.translate(x,cssHeight-17);ctx.rotate(-.53);ctx.fillText(series[itemIndex].label,0,0);ctx.restore()}
     qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"MA"+maLabel())+"与"+(state.lower==="macd"?"MACD":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
-    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
-    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名或前推成绩。":"；技术指标只描述历史。") ;
+    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(state.expertHints?"，已显示机会、停止与风险技术形态点":"")+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
+    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(state.expertHints?"；▲机会、■停止、▼风险均由当期收柱前缀因果识别，属于技术形态观察点。":"；专家提示已关闭。")+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名、专家提示或前推成绩。":"；技术指标只描述历史。") ;
     if(scrollLatest&&series.length>60)requestAnimationFrame(function(){scroll.scrollLeft=Math.max(0,scroll.scrollWidth-scroll.clientWidth)})
   }
   function scheduleChart(scrollLatest){cancelAnimationFrame(chartFrame);chartFrame=requestAnimationFrame(function(){drawChart(!!scrollLatest)})}
@@ -1094,8 +1251,8 @@ Error generating stack: `+e.message+`
     var data=chartData(),series=data.series;
     if(!series.length)return;
     index=Math.max(0,Math.min(series.length-1,index));state.hoverIndex=index;
-    var row=series[index],mac=data.mac[index],movement=row.close-row.open,tip=qs("#smp-tip");
-    tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+'</span>':'');
+    var row=series[index],mac=data.mac[index],movement=row.close-row.open,tip=qs("#smp-tip"),expert=data.expertMarkers&&data.expertMarkers[index],expertLabel=expert?(expert.type==="opportunity"?'▲机会观察点':expert.type==="stop"?'■停止观察点':'▼风险提醒点'):"";
+    tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+'</span>':'')+(expert?'<span>系统提示：'+safeText(expertLabel)+' · 对'+safeText(expert.nextLabel)+'</span><span>依据：'+safeText(expert.reasons.slice(0,2).join(' · '))+'</span>':'');
     tip.hidden=false;updatePointButtons()
   }
   function pointAt(event){
@@ -1121,7 +1278,7 @@ Error generating stack: `+e.message+`
   }
   function renderAll(scrollLatest){
     if(!specials.length)return;
-    renderContextControls();renderModeControls();renderCategories();renderStats();renderRanking();renderAnalysis();renderHistory();updatePointButtons();scheduleChart(scrollLatest)
+    renderContextControls();renderModeControls();renderCategories();renderStats();renderRanking();renderAnalysis();renderHistory();renderExpertHint();updatePointButtons();scheduleChart(scrollLatest)
   }
   function bind(){
     qsa("[data-smp-view]").forEach(function(button){button.addEventListener("click",function(){setView(button.getAttribute("data-smp-view"))})});
@@ -1130,6 +1287,7 @@ Error generating stack: `+e.message+`
     qsa("[data-smp-ma-action]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-ma-action");if(action==="reset")applyMaPeriods(DEFAULT_MA.slice(),true);else applyMaPeriods([qs("#smp-ma-fast").value,qs("#smp-ma-mid").value,qs("#smp-ma-slow").value],false)})});
     qsa("#smp-ma-settings input").forEach(function(input){input.addEventListener("keydown",function(event){if(event.key==="Enter"){event.preventDefault();qs('[data-smp-ma-action="apply"]').click()}})});
     qsa("[data-smp-lower]").forEach(function(button){button.addEventListener("click",function(){state.lower=button.getAttribute("data-smp-lower");renderAll(false);if(state.hoverIndex!=null)renderTip(state.hoverIndex)})});
+    qs("#smp-expert-toggle").addEventListener("click",function(){state.expertHints=!state.expertHints;try{localStorage.setItem("macau-special-expert-hints",state.expertHints?"true":"false")}catch(error){}renderExpertHint();scheduleChart(false);if(state.hoverIndex!=null)renderTip(state.hoverIndex)});
     var mobileTabs=qsa("[data-smp-mobile-view]");
     mobileTabs.forEach(function(button,index){
       button.addEventListener("click",function(){setMobileView(button.getAttribute("data-smp-mobile-view"))});
@@ -1146,7 +1304,7 @@ Error generating stack: `+e.message+`
     qs("#smp-window-select").addEventListener("change",function(event){var raw=event.target.value;state.windowSize=raw==="all"?"all":Number(raw);state.hoverIndex=null;state.locked=false;renderAll(true)});
     qs("#smp-history-select").addEventListener("change",function(event){setCutoff(Number(event.target.value))});
     qsa("[data-smp-history]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-history");if(action==="prev")setCutoff(state.cutoffIndex-1);else if(action==="next")setCutoff(state.cutoffIndex+1);else setCutoff(specials.length-1)})});
-    qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true;renderContextControls();updatePointButtons();scheduleChart(true)})});
+    qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true;renderContextControls();renderExpertHint();updatePointButtons();scheduleChart(true)})});
     qs("#smp-fullscreen").addEventListener("click",toggleFullscreen);
     var canvas=qs("#smp-chart");
     canvas.addEventListener("pointermove",function(event){if(!state.locked){var index=pointAt(event);if(index!=null)renderTip(index)}});
@@ -1179,10 +1337,12 @@ Error generating stack: `+e.message+`
     var saved="main",requested=false;
     try{saved=localStorage.getItem("macau-special-view")||"main"}catch(error){}
     try{var savedMa=validMaPeriods(JSON.parse(localStorage.getItem("macau-special-ma-periods")||"null"));if(savedMa)state.maPeriods=savedMa}catch(error){}
+    try{state.expertHints=localStorage.getItem("macau-special-expert-hints")!=="false"}catch(error){}
     try{requested=new URLSearchParams(location.search).get("view")==="special"||location.hash==="#special"}catch(error){}
     var desiredView=requested||saved==="special"?"special":"main";
     try{
       specials=parseRows(globalThis.__MACAU_DRAWS__);
+      expertCache={key:"",value:null};
       state.cutoffIndex=specials.length-1;
       var latest=specials[specials.length-1];
       state.selected.group=latest.group;state.selected.size=latest.size;state.selected.parity=latest.parity;
