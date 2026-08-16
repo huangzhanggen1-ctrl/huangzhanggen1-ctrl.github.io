@@ -235,8 +235,8 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-panel-head p{margin:0 0 4px;color:#5db3e8;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
 #macau-special-panel .smp-page-head h1{margin:0;font-size:26px;letter-spacing:-.02em}
 #macau-special-panel .smp-live{padding:8px 13px;border:1px solid #29415e;border-radius:999px;background:#0c1b2dbb;color:#a9bad0;font-size:12px;white-space:nowrap}
-#macau-special-panel .smp-mode-toolbar{display:flex;align-items:center;gap:14px;margin-bottom:10px}
-#macau-special-panel .smp-seg{display:flex;flex:none;width:max-content;max-width:100%;padding:4px;border:1px solid var(--smp-line);border-radius:12px;background:#091626}
+#macau-special-panel .smp-mode-toolbar{display:flex;align-items:center;gap:14px;min-width:0;margin-bottom:10px}
+#macau-special-panel .smp-seg{display:grid;grid-template-columns:repeat(8,minmax(96px,1fr));gap:3px;width:100%;max-width:100%;padding:4px;border:1px solid var(--smp-line);border-radius:12px;background:#091626}
 #macau-special-panel .smp-seg button{min-height:44px;padding:9px 16px;border:0;border-radius:8px;background:transparent;color:#8da2bb;font-weight:800;white-space:nowrap}
 #macau-special-panel .smp-seg button.smp-on{background:#235d88;color:#fff;box-shadow:0 5px 18px #0005}
 #macau-special-panel .smp-data-status{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 10px;padding:9px 11px;border:1px solid #246449;border-radius:10px;background:#0b1b2d;color:#89deb9;font-size:12px;line-height:1.45}
@@ -403,6 +403,7 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-panel.smp-fullscreen .smp-scroll-hint,
 #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-below-controls{display:none}
 @media(max-width:900px){
+ #macau-special-panel .smp-seg{grid-template-columns:repeat(4,minmax(0,1fr))}
  #macau-special-panel .smp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
  #macau-special-panel .smp-grid2{grid-template-columns:1fr}
  #macau-special-panel .smp-analysis-hero{grid-template-columns:1fr}
@@ -416,8 +417,8 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-page-head h1{font-size:20px}
  #macau-special-panel .smp-live{padding:6px 8px;font-size:9px}
  #macau-special-panel .smp-mode-toolbar{display:block}
- #macau-special-panel .smp-seg{width:100%}
- #macau-special-panel .smp-seg button{flex:1;padding:10px 7px;font-size:12px}
+ #macau-special-panel .smp-seg{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;width:100%}
+ #macau-special-panel .smp-seg button{width:100%;min-width:0;padding:8px 2px;font-size:11px;white-space:normal;word-break:keep-all}
  #macau-special-panel .smp-data-status{font-size:12px}
  #macau-special-panel .smp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
  #macau-special-panel .smp-stats article{padding:10px}
@@ -459,7 +460,7 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-history-bar select{order:3;flex-basis:100%;min-width:0;min-height:44px}
  #macau-special-panel .smp-history-state{order:4;width:100%;margin-left:0;text-align:center;white-space:normal}
  #macau-special-panel .smp-scroll-hint{font-size:12px;line-height:1.65}
- #macau-special-panel .smp-history table{min-width:650px}
+ #macau-special-panel .smp-history table{min-width:1080px}
  #macau-special-panel .smp-analysis-status{min-height:32px;font-size:11px}
  #macau-special-panel .smp-analysis-hero{grid-template-columns:1fr}
  #macau-special-panel .smp-verdict{min-height:0;padding:14px}
@@ -507,6 +508,11 @@ Error generating stack: `+e.message+`
       <button class="smp-on" type="button" data-smp-mode="group" role="tab" aria-selected="true">家禽／野兽</button>
       <button type="button" data-smp-mode="size" role="tab" aria-selected="false">大小</button>
       <button type="button" data-smp-mode="parity" role="tab" aria-selected="false">单双</button>
+      <button type="button" data-smp-mode="tailSize" role="tab" aria-selected="false">大小尾</button>
+      <button type="button" data-smp-mode="yinYang" role="tab" aria-selected="false">阴阳肖</button>
+      <button type="button" data-smp-mode="digitParity" role="tab" aria-selected="false">合数单双</button>
+      <button type="button" data-smp-mode="blackWhite" role="tab" aria-selected="false">黑白肖</button>
+      <button type="button" data-smp-mode="fortune" role="tab" aria-selected="false">凶吉肖</button>
     </div>
   </section>
   <div class="smp-data-status" id="smp-source-status" role="status" aria-live="polite"><span>正在读取并核验开奖记录</span><b>等待真实数据</b></div>
@@ -650,19 +656,22 @@ Error generating stack: `+e.message+`
       </div>
     </section>
     <section class="smp-panel smp-history smp-mobile-panel" id="smp-mobile-panel-history" data-smp-mobile-panel="history" role="tabpanel" aria-labelledby="smp-mobile-tab-history">
-      <div class="smp-panel-head"><div><p>LATEST 20 SPECIALS</p><h3>最近20期二分类记录</h3><small>每行只取“＋号后”的特码，同时列出三种归类。</small></div></div>
+      <div class="smp-panel-head"><div><p>LATEST 20 SPECIALS</p><h3>最近20期二分类记录</h3><small>每行只取“＋号后”的特码，同时列出八种固定归类。</small></div></div>
       <div class="smp-table-wrap">
-        <table><thead><tr><th>期号</th><th>日期</th><th>特码</th><th>生肖</th><th>家禽／野兽</th><th>大小</th><th>单双</th></tr></thead><tbody id="smp-history"></tbody></table>
+        <table><thead><tr><th>期号</th><th>日期</th><th>特码</th><th>生肖</th><th>家禽／野兽</th><th>大小</th><th>单双</th><th>大小尾</th><th>阴阳肖</th><th>合数单双</th><th>黑白肖</th><th>凶吉肖</th></tr></thead><tbody id="smp-history"></tbody></table>
       </div>
     </section>
   </div>
-  <p class="smp-note">口径：家禽＝牛、马、羊、鸡、狗、猪；野兽＝鼠、虎、兔、龙、蛇、猴。1–24为小，25–49为大；奇数为单，偶数为双。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。用户自定义MA周期只改变图表显示，专业研判与严格前推继续固定使用MA5／10／20。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
+  <p class="smp-note">固定口径：家禽＝牛马羊鸡狗猪，野兽＝鼠虎兔龙蛇猴；1–24小、25–49大；奇数单、偶数双；0–4小尾、5–9大尾；阴肖＝鼠龙蛇马狗猪，阳肖＝牛虎兔羊猴鸡；合数单双按十位与个位之和判奇偶；白肖＝鼠牛虎鸡狗猪，黑肖＝兔龙蛇马羊猴；吉肖＝兔龙蛇马羊鸡，凶肖＝鼠牛虎猴狗猪。49固定归大尾、合单。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。用户自定义MA周期只改变图表显示，专业研判与严格前推继续固定使用MA5／10／20。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
 </section>
 <script id="macau-special-binary-script">
 (function(){
   "use strict";
   var ZODIACS=["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
   var DOMESTIC=["牛","马","羊","鸡","狗","猪"];
+  var YIN_ZODIACS=["鼠","龙","蛇","马","狗","猪"];
+  var WHITE_ZODIACS=["鼠","牛","虎","鸡","狗","猪"];
+  var LUCKY_ZODIACS=["兔","龙","蛇","马","羊","鸡"];
   var CNY=[
     {from:"2022-02-01",animal:"虎"},
     {from:"2023-01-22",animal:"兔"},
@@ -672,12 +681,17 @@ Error generating stack: `+e.message+`
     {from:"2027-02-06",animal:"羊"}
   ];
   var MODE={
-    group:{title:"家禽／野兽",select:"选择家禽／野兽",values:["家禽","野兽"]},
+    group:{title:"家禽／野兽",select:"选择家禽／野兽",values:["家禽","野兽"],zodiac:true},
     size:{title:"大小",select:"选择大小",values:["大","小"]},
-    parity:{title:"单双",select:"选择单双",values:["单","双"]}
+    parity:{title:"单双",select:"选择单双",values:["单","双"]},
+    tailSize:{title:"大小尾",select:"选择大小尾",values:["大尾","小尾"]},
+    yinYang:{title:"阴阳肖",select:"选择阴阳肖",values:["阴肖","阳肖"],zodiac:true},
+    digitParity:{title:"合数单双",select:"选择合数单双",values:["合单","合双"]},
+    blackWhite:{title:"黑白肖",select:"选择黑白肖",values:["白肖","黑肖"],zodiac:true},
+    fortune:{title:"凶吉肖",select:"选择凶吉肖",values:["吉肖","凶肖"],zodiac:true}
   };
   var DEFAULT_MA=[5,10,20];
-  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),expertHints:true,mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
+  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),expertHints:true,mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null,tailSize:null,yinYang:null,digitParity:null,blackWhite:null,fortune:null}};
   var specials=[];
   var skipped=0;
   var chartFrame=0;
@@ -727,24 +741,38 @@ Error generating stack: `+e.message+`
     if(!anchor)return null;
     return ZODIACS[(ZODIACS.indexOf(anchor)-(number-1)+1200)%12]
   }
-  function groupCount(value,date){
-    if(!yearAnimal(date))return null;
+  function digitSum(number){return String(number).split("").reduce(function(sum,digit){return sum+Number(digit)},0)}
+  function classify(number,zodiac){
+    return {
+      group:DOMESTIC.indexOf(zodiac)>=0?"家禽":"野兽",
+      size:number>=25?"大":"小",
+      parity:number%2?"单":"双",
+      tailSize:number%10>=5?"大尾":"小尾",
+      yinYang:YIN_ZODIACS.indexOf(zodiac)>=0?"阴肖":"阳肖",
+      digitParity:digitSum(number)%2?"合单":"合双",
+      blackWhite:WHITE_ZODIACS.indexOf(zodiac)>=0?"白肖":"黑肖",
+      fortune:LUCKY_ZODIACS.indexOf(zodiac)>=0?"吉肖":"凶肖"
+    }
+  }
+  function zodiacModeCount(mode,value,date){
+    if(!MODE[mode]||!MODE[mode].zodiac||!yearAnimal(date))return null;
     var count=0;
     for(var number=1;number<=49;number+=1){
-      var zodiac=zodiacForNumber(number,date);
-      var group=DOMESTIC.indexOf(zodiac)>=0?"家禽":"野兽";
-      if(group===value)count+=1
+      var zodiac=zodiacForNumber(number,date),classes=classify(number,zodiac);
+      if(classes[mode]===value)count+=1
     }
     return count
   }
-  function classify(number,zodiac){return {group:DOMESTIC.indexOf(zodiac)>=0?"家禽":"野兽",size:number>=25?"大":"小",parity:number%2?"单":"双"}}
   function baseline(mode,value,row){
-    if(mode==="group"){
-      var count=groupCount(value,row.date);
+    if(MODE[mode]&&MODE[mode].zodiac){
+      var count=zodiacModeCount(mode,value,row.date);
       return count==null?.5:count/49
     }
     if(mode==="size")return value==="大"?25/49:24/49;
-    return value==="单"?25/49:24/49
+    if(mode==="parity")return value==="单"?25/49:24/49;
+    if(mode==="tailSize")return value==="大尾"?25/49:24/49;
+    if(mode==="digitParity")return value==="合单"?25/49:24/49;
+    return .5
   }
   function isHit(row,mode,value){return row[mode]===value}
   function prefixRows(){return specials.slice(0,Math.max(0,Math.min(state.cutoffIndex,specials.length-1))+1)}
@@ -761,7 +789,7 @@ Error generating stack: `+e.message+`
     return {label:label,date:date}
   }
   function nextMeta(){return deriveNextMeta(latestAtCutoff())}
-  function simulationAvailable(){var meta=nextMeta();return !!meta.date&&(state.mode!=="group"||groupCount(stateValue(),meta.date)!=null)}
+  function simulationAvailable(){var meta=nextMeta();return !!meta.date&&(!MODE[state.mode].zodiac||zodiacModeCount(state.mode,stateValue(),meta.date)!=null)}
   function omission(value,mode){
     var rows=prefixRows(),miss=0;
     for(var i=rows.length-1;i>=0;i-=1){if(isHit(rows[i],mode,value))return miss;miss+=1}
@@ -1057,7 +1085,7 @@ Error generating stack: `+e.message+`
     var row=latestAtCutoff(),rows=prefixRows(),isLatest=state.cutoffIndex===specials.length-1,meta=nextMeta(),simulation=state.simulation;
     if(!row)return;
     qs("#smp-live").textContent=(isLatest?"数据截至 ":"历史截至 ")+row.label;
-    qs("#smp-source-status").innerHTML='<span>'+rows.length+'期前缀数据 · 截至 '+safeText(row.label)+' · 当期特码 '+pad(row.number)+safeText(row.zodiac)+' · '+safeText(row.group)+'／'+safeText(row.size)+'／'+safeText(row.parity)+(simulation?' · 正在模拟 '+safeText(meta.label)+(simulation==="hit"?'开出':'未开'):'')+'</span><b>'+(isLatest?'真实最新状态':'历史回看 · 后续'+(specials.length-1-state.cutoffIndex)+'期完全隐藏')+'</b>';
+    qs("#smp-source-status").innerHTML='<span>'+rows.length+'期前缀数据 · 截至 '+safeText(row.label)+' · 当期特码 '+pad(row.number)+safeText(row.zodiac)+' · '+safeText(MODE[state.mode].title)+'＝'+safeText(row[state.mode])+(simulation?' · 正在模拟 '+safeText(meta.label)+(simulation==="hit"?'开出':'未开'):'')+'</span><b>'+(isLatest?'真实最新状态':'历史回看 · 后续'+(specials.length-1-state.cutoffIndex)+'期完全隐藏')+'</b>';
     var select=qs("#smp-history-select");if(select)select.value=String(state.cutoffIndex);
     var prev=qs('[data-smp-history="prev"]'),next=qs('[data-smp-history="next"]'),latest=qs('[data-smp-history="latest"]');
     if(prev)prev.disabled=state.cutoffIndex<=0;if(next)next.disabled=isLatest;if(latest)latest.disabled=isLatest;
@@ -1090,7 +1118,7 @@ Error generating stack: `+e.message+`
     var cards=[
       ["观察对象",item.value,MODE[state.mode].title+"独立口径",false],
       ["窗口命中",item.hits+" / "+item.n,percent(item.frequency),false],
-      ["理论基准",percent(item.p0),state.mode==="group"?"按当期生肖号码量":"按1–49精确数量",false],
+      ["理论基准",percent(item.p0),MODE[state.mode].zodiac?"按当期生肖号码量":"按1–49精确数量",false],
       ["收缩频率",percent(item.shrink),signed(item.edge)+" vs 基准",true],
       ["遗漏 / 连开",item.miss+" / "+(item.miss===0?"开":"0"),"遗漏在前 · 连开在后",false]
     ];
@@ -1100,7 +1128,7 @@ Error generating stack: `+e.message+`
     qs("#smp-ranking").innerHTML=rankingRows().map(function(row){var tone=row.edge>=0?"smp-positive":"smp-negative";return '<tr><td class="smp-rank-name">'+safeText(row.value)+'</td><td>'+row.hits+'</td><td>'+percent(row.frequency)+'</td><td>'+percent(row.p0)+'</td><td class="'+tone+'">'+percent(row.shrink)+'</td><td>'+row.miss+'</td></tr>'}).join("")
   }
   function renderHistory(){
-    qs("#smp-history").innerHTML=prefixRows().slice(-20).reverse().map(function(row){return '<tr><td>'+safeText(row.label)+'</td><td>'+safeText(row.date||"—")+'</td><td>'+pad(row.number)+'</td><td>'+safeText(row.zodiac)+'</td><td>'+safeText(row.group)+'</td><td>'+safeText(row.size)+'</td><td>'+safeText(row.parity)+'</td></tr>'}).join("")
+    qs("#smp-history").innerHTML=prefixRows().slice(-20).reverse().map(function(row){return '<tr><td>'+safeText(row.label)+'</td><td>'+safeText(row.date||"—")+'</td><td>'+pad(row.number)+'</td><td>'+safeText(row.zodiac)+'</td><td>'+safeText(row.group)+'</td><td>'+safeText(row.size)+'</td><td>'+safeText(row.parity)+'</td><td>'+safeText(row.tailSize)+'</td><td>'+safeText(row.yinYang)+'</td><td>'+safeText(row.digitParity)+'</td><td>'+safeText(row.blackWhite)+'</td><td>'+safeText(row.fortune)+'</td></tr>'}).join("")
   }
   function renderAnalysis(){
     var value=stateValue(),data=fullAnalysisData(state.mode,value),index=data.series.length-1,snapshot=technicalAt(data.series,data.boll,data.mac,index);
@@ -1326,7 +1354,7 @@ Error generating stack: `+e.message+`
       var label=String(rawLabel).trim()||String(index+1),date=normalizeDate(draw.date),key=(date||"?")+"|"+label;
       if(seen[key]){skipped+=1;return}seen[key]=true;
       var classes=classify(number,zodiac);
-      rows.push({label:label,date:date,number:number,zodiac:zodiac,group:classes.group,size:classes.size,parity:classes.parity})
+      rows.push({label:label,date:date,number:number,zodiac:zodiac,group:classes.group,size:classes.size,parity:classes.parity,tailSize:classes.tailSize,yinYang:classes.yinYang,digitParity:classes.digitParity,blackWhite:classes.blackWhite,fortune:classes.fortune})
     });
     if(!rows.length)throw new Error("没有可用的特码记录");
     return rows
@@ -1345,7 +1373,7 @@ Error generating stack: `+e.message+`
       expertCache={key:"",value:null};
       state.cutoffIndex=specials.length-1;
       var latest=specials[specials.length-1];
-      state.selected.group=latest.group;state.selected.size=latest.size;state.selected.parity=latest.parity;
+      Object.keys(MODE).forEach(function(mode){state.selected[mode]=latest[mode]});
       qs("#smp-history-select").innerHTML=specials.map(function(row,index){return '<option value="'+index+'">'+safeText(row.label)+' · '+safeText(row.date||"日期未知")+'</option>'}).join("");
       renderHistory();setMobileView("chart");renderAll(false);setView(desiredView)
     }catch(error){showError(error&&error.message?error.message:"未知数据错误");setView("special")}
