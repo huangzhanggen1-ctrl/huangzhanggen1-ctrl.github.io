@@ -271,6 +271,20 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-indicator-bar button.smp-on{border-color:#4aaddb;background:#236d9d;color:#fff;box-shadow:inset 0 0 0 1px #67c8f855}
 #macau-special-panel .smp-indicator-bar .smp-divider{width:1px;height:20px;margin:0 2px;background:#29415b}
 #macau-special-panel .smp-indicator-bar small{margin-right:auto;color:#8ba4c0;font-size:10px}
+#macau-special-panel .smp-sim-bar,
+#macau-special-panel .smp-history-bar{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:8px;padding:8px 10px;border:1px solid #29415b;border-radius:10px;background:#0a1a2c}
+#macau-special-panel .smp-sim-bar>span{margin-right:auto;color:#8fa8c0;font-size:10px;line-height:1.45}
+#macau-special-panel .smp-sim-bar>output{flex-basis:100%;color:#f1d77f;font-size:10px;line-height:1.45}
+#macau-special-panel .smp-sim-bar>b,
+#macau-special-panel .smp-history-bar>b{color:#dce8f6;font-size:11px;white-space:nowrap}
+#macau-special-panel .smp-sim-bar button,
+#macau-special-panel .smp-history-bar button,
+#macau-special-panel .smp-history-bar select{min-height:36px;padding:6px 9px;border:1px solid #2c4462;border-radius:8px;background:#13263e;color:#dce8f6;font-size:11px;white-space:nowrap}
+#macau-special-panel .smp-sim-bar button.smp-on{border-color:var(--smp-gold);background:#6d5718;color:#fff1a8;box-shadow:inset 0 0 0 1px #f7c84355}
+#macau-special-panel .smp-history-bar{margin:0}
+#macau-special-panel .smp-history-bar select{flex:1;min-width:210px}
+#macau-special-panel .smp-history-state{margin-left:auto;padding:5px 8px;border:1px solid #246449;border-radius:999px;background:#0d382b;color:#9be2bf;font-size:10px;font-weight:800;white-space:nowrap}
+#macau-special-panel .smp-history-state.smp-back{border-color:#8d7331;background:#3a3218;color:#ffe28a}
 #macau-special-panel .smp-chart-scroll{width:100%;position:relative;border:1px solid #1f334c;border-radius:11px;background:#09182a;overflow:auto hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;scrollbar-width:thin}
 #macau-special-panel .smp-chart-stage{min-width:100%;height:500px;position:relative}
 #macau-special-panel #smp-chart{display:block;touch-action:pan-x pan-y pinch-zoom}
@@ -389,6 +403,13 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-chart-pick-bar>b{display:block;margin-bottom:7px;font-size:13px}
  #macau-special-panel .smp-picks{flex-wrap:wrap;overflow-x:visible}
  #macau-special-panel .smp-picks button{flex:1;min-width:calc(50% - 3px)}
+ #macau-special-panel .smp-sim-bar>span{width:100%;margin-right:0}
+ #macau-special-panel .smp-sim-bar button{min-height:44px;flex:1}
+ #macau-special-panel .smp-history-bar{align-items:stretch}
+ #macau-special-panel .smp-history-bar>b{width:100%;align-self:center}
+ #macau-special-panel .smp-history-bar button{min-height:44px;flex:1}
+ #macau-special-panel .smp-history-bar select{order:3;flex-basis:100%;min-width:0;min-height:44px}
+ #macau-special-panel .smp-history-state{order:4;width:100%;margin-left:0;text-align:center;white-space:normal}
  #macau-special-panel .smp-scroll-hint{font-size:12px;line-height:1.65}
  #macau-special-panel .smp-history table{min-width:650px}
  #macau-special-panel .smp-analysis-status{min-height:32px;font-size:11px}
@@ -485,6 +506,14 @@ Error generating stack: `+e.message+`
         <button type="button" data-smp-lower="omission" aria-pressed="false">强度／遗漏</button>
         <small id="smp-indicator-note">BOLL：紫上轨 · 黄中轨 · 蓝下轨</small>
       </div>
+      <div class="smp-sim-bar" aria-label="下一期图形模拟">
+        <span>下一期图形模拟 · 只改变K线预览，不进入研判、排名或前推成绩</span>
+        <b id="smp-sim-target">模拟下一期</b>
+        <button type="button" data-smp-sim="hit" aria-pressed="false">模拟开出</button>
+        <button type="button" data-smp-sim="miss" aria-pressed="false">模拟未开</button>
+        <button type="button" data-smp-sim="clear" disabled>清除模拟</button>
+        <output id="smp-sim-status" role="status" aria-live="polite">未启用模拟</output>
+      </div>
       <div class="smp-chart-scroll" id="smp-chart-scroll">
         <div class="smp-chart-stage" id="smp-chart-stage"><canvas id="smp-chart" role="img" tabindex="0" aria-label="特码二分类历史校准K线图"></canvas></div>
       </div>
@@ -501,6 +530,14 @@ Error generating stack: `+e.message+`
       <div class="smp-chart-pick-bar">
         <b id="smp-category-label">选择家禽／野兽</b>
         <div class="smp-picks" id="smp-category-grid" role="group" aria-label="选择观察对象"></div>
+      </div>
+      <div class="smp-history-bar" aria-label="历史回看">
+        <b>历史回看</b>
+        <button type="button" data-smp-history="prev">上一期</button>
+        <select id="smp-history-select" aria-label="历史回看期号"></select>
+        <button type="button" data-smp-history="next">下一期</button>
+        <button type="button" data-smp-history="latest">回到最新</button>
+        <span class="smp-history-state" id="smp-history-state">当前真实数据</span>
       </div>
     </div>
   </section>
@@ -543,7 +580,7 @@ Error generating stack: `+e.message+`
       </div>
     </section>
   </div>
-  <p class="smp-note">口径：家禽＝牛、马、羊、鸡、狗、猪；野兽＝鼠、虎、兔、龙、蛇、猴。1–24为小，25–49为大；奇数为单，偶数为双。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
+  <p class="smp-note">口径：家禽＝牛、马、羊、鸡、狗、猪；野兽＝鼠、虎、兔、龙、蛇、猴。1–24为小，25–49为大；奇数为单，偶数为双。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
 </section>
 <script id="macau-special-binary-script">
 (function(){
@@ -563,7 +600,7 @@ Error generating stack: `+e.message+`
     size:{title:"大小",select:"选择大小",values:["大","小"]},
     parity:{title:"单双",select:"选择单双",values:["单","双"]}
   };
-  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,selected:{group:null,size:null,parity:null}};
+  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null}};
   var specials=[];
   var skipped=0;
   var chartFrame=0;
@@ -613,19 +650,34 @@ Error generating stack: `+e.message+`
     return value==="单"?25/49:24/49
   }
   function isHit(row,mode,value){return row[mode]===value}
+  function prefixRows(){return specials.slice(0,Math.max(0,Math.min(state.cutoffIndex,specials.length-1))+1)}
+  function latestAtCutoff(){return specials[Math.max(0,Math.min(state.cutoffIndex,specials.length-1))]||null}
+  function addDays(date,days){
+    if(!/^20\d{2}-\d{2}-\d{2}$/.test(date))return "";
+    var parts=date.split("-").map(Number),value=new Date(Date.UTC(parts[0],parts[1]-1,parts[2]+days));
+    return value.getUTCFullYear()+"-"+pad(value.getUTCMonth()+1)+"-"+pad(value.getUTCDate())
+  }
+  function nextMeta(){
+    var current=latestAtCutoff();if(!current)return {label:"下一期",date:""};
+    var date=addDays(current.date,1),match=String(current.label).match(/^(20\d{2})-(\d{3})$/),label="下一期";
+    if(match){var nextYear=date?date.slice(0,4):match[1],nextNumber=nextYear!==match[1]?1:Number(match[2])+1;label=nextYear+"-"+String(nextNumber).padStart(3,"0")}
+    return {label:label,date:date}
+  }
+  function simulationAvailable(){var meta=nextMeta();return !!meta.date&&(state.mode!=="group"||groupCount(stateValue(),meta.date)!=null)}
   function omission(value,mode){
-    var miss=0;
-    for(var i=specials.length-1;i>=0;i-=1){if(isHit(specials[i],mode,value))return miss;miss+=1}
-    return specials.length
+    var rows=prefixRows(),miss=0;
+    for(var i=rows.length-1;i>=0;i-=1){if(isHit(rows[i],mode,value))return miss;miss+=1}
+    return rows.length
   }
   function currentWindow(){
-    if(state.windowSize==="all")return specials.slice();
-    return specials.slice(-Math.min(Number(state.windowSize),specials.length))
+    var rows=prefixRows();
+    if(state.windowSize==="all")return rows;
+    return rows.slice(-Math.min(Number(state.windowSize),rows.length))
   }
   function stateValue(){
     var value=state.selected[state.mode];
     if(value!=null)return value;
-    var latest=specials[specials.length-1];
+    var latest=latestAtCutoff();
     value=latest?latest[state.mode]:MODE[state.mode].values[0];
     state.selected[state.mode]=value;
     return value
@@ -769,10 +821,10 @@ Error generating stack: `+e.message+`
   }
   function walkForward(mode,value){
     // Causal precomputation: every BOLL/MACD element is built only from indices <= itself.
-    // At index t the signal is frozen first; only specials[t+1] is then opened for settlement.
-    var series=buildSeriesForRows(specials,mode,value),closes=series.map(function(row){return row.close}),boll=bollinger(closes),mac=macd(closes),records=[];
+    // At index t the signal is frozen first; only rows[t+1] is then opened for settlement.
+    var rows=prefixRows(),series=buildSeriesForRows(rows,mode,value),closes=series.map(function(row){return row.close}),boll=bollinger(closes),mac=macd(closes),records=[];
     for(var index=59;index<series.length-1;index+=1){
-      var snapshot=technicalAt(series,boll,mac,index),direction=snapshot.direction,next=specials[index+1],actual=isHit(next,mode,value)?1:-1;
+      var snapshot=technicalAt(series,boll,mac,index),direction=snapshot.direction,next=rows[index+1],actual=isHit(next,mode,value)?1:-1;
       records.push({label:next.label,direction:direction,actual:actual,correct:direction!==0&&direction===actual,expected:direction>0?baseline(mode,value,next):direction<0?1-baseline(mode,value,next):0,failure:direction!==0&&direction!==actual?failureTag(snapshot,direction):""})
     }
     var windows=[30,60,100,200,300,500,700,"all"],results=windows.map(function(size){return evaluateForwardSlice(records,size)}),failureCounts={};
@@ -812,6 +864,27 @@ Error generating stack: `+e.message+`
     qsa("[data-smp-mobile-panel]").forEach(function(panel){var on=panel.getAttribute("data-smp-mobile-panel")===view;panel.classList.toggle("smp-mobile-hidden",!on);if(mobile)panel.setAttribute("aria-hidden",on?"false":"true");else panel.removeAttribute("aria-hidden")});
     if(view==="chart")scheduleChart()
   }
+  function setCutoff(index){
+    state.cutoffIndex=Math.max(0,Math.min(specials.length-1,Math.round(Number(index)||0)));
+    state.simulation=null;state.hoverIndex=null;state.locked=false;
+    var tip=qs("#smp-tip");if(tip)tip.hidden=true;
+    renderAll(true)
+  }
+  function renderContextControls(){
+    var row=latestAtCutoff(),rows=prefixRows(),isLatest=state.cutoffIndex===specials.length-1,meta=nextMeta(),simulation=state.simulation;
+    if(!row)return;
+    qs("#smp-live").textContent=(isLatest?"数据截至 ":"历史截至 ")+row.label;
+    qs("#smp-source-status").innerHTML='<span>'+rows.length+'期前缀数据 · 截至 '+safeText(row.label)+' · 当期特码 '+pad(row.number)+safeText(row.zodiac)+' · '+safeText(row.group)+'／'+safeText(row.size)+'／'+safeText(row.parity)+(simulation?' · 正在模拟 '+safeText(meta.label)+(simulation==="hit"?'开出':'未开'):'')+'</span><b>'+(isLatest?'真实最新状态':'历史回看 · 后续'+(specials.length-1-state.cutoffIndex)+'期完全隐藏')+'</b>';
+    var select=qs("#smp-history-select");if(select)select.value=String(state.cutoffIndex);
+    var prev=qs('[data-smp-history="prev"]'),next=qs('[data-smp-history="next"]'),latest=qs('[data-smp-history="latest"]');
+    if(prev)prev.disabled=state.cutoffIndex<=0;if(next)next.disabled=isLatest;if(latest)latest.disabled=isLatest;
+    var historyState=qs("#smp-history-state");if(historyState){historyState.textContent=isLatest?"当前真实数据":"历史回看 · 后续"+(specials.length-1-state.cutoffIndex)+"期完全隐藏";historyState.classList.toggle("smp-back",!isLatest)}
+    qs("#smp-sim-target").textContent="模拟 "+meta.label+" · "+stateValue();
+    var canSimulate=simulationAvailable();
+    qsa("[data-smp-sim]").forEach(function(button){var action=button.getAttribute("data-smp-sim"),on=simulation===action;button.classList.toggle("smp-on",on);if(action==="clear"){button.removeAttribute("aria-pressed");button.disabled=!simulation}else{button.setAttribute("aria-pressed",on?"true":"false");button.disabled=!canSimulate}});
+    qs("#smp-sim-status").textContent=!canSimulate?"下一期日期或理论基准无法确定，模拟已停用":simulation?meta.label+"已模拟“"+(simulation==="hit"?"开出":"未开")+"” · 只进入图形预览，分析与成绩保持真实前缀":"未启用模拟";
+    var truth=qs(".smp-truth-badge");if(truth)truth.textContent=simulation?"模拟预览 · 完全不进入分析／排名":isLatest?"正式趋势视图 · 已扣除二分类理论漂移":"历史前缀视图 · 未来开奖记录完全隐藏"
+  }
   function renderModeControls(){
     qsa("[data-smp-mode]").forEach(function(button){var on=button.getAttribute("data-smp-mode")===state.mode;button.classList.toggle("smp-on",on);button.setAttribute("aria-selected",on?"true":"false")});
     qsa("[data-smp-overlay]").forEach(function(button){var on=button.getAttribute("data-smp-overlay")===state.overlay;button.classList.toggle("smp-on",on);button.setAttribute("aria-pressed",on?"true":"false")});
@@ -819,13 +892,14 @@ Error generating stack: `+e.message+`
     qs("#smp-window-select").value=String(state.windowSize);
     qs("#smp-category-label").textContent=MODE[state.mode].select;
     qs("#smp-ranking-title").textContent=MODE[state.mode].title+"窗口排名";
-    qs("#smp-window-label").textContent=state.windowSize==="all"?"全库 "+specials.length+"期":"近"+state.windowSize+"期";
+    var visibleCount=currentWindow().length;
+    qs("#smp-window-label").textContent=state.windowSize==="all"?"前缀全库 "+visibleCount+"期":"近"+visibleCount+"期";
     qs("#smp-indicator-note").textContent=state.overlay==="boll"?"BOLL：紫上轨 · 黄中轨 · 蓝下轨":"MA：黄5期 · 紫10期 · 蓝20期"
   }
   function renderCategories(){
     var grid=qs("#smp-category-grid"),selected=stateValue();
     grid.innerHTML=MODE[state.mode].values.map(function(value){return '<button type="button" class="'+(value===selected?'smp-on':'')+'" data-smp-category="'+safeText(value)+'" aria-pressed="'+(value===selected?'true':'false')+'">'+safeText(value)+'</button>'}).join("");
-    qsa("[data-smp-category]",grid).forEach(function(button){button.addEventListener("click",function(){state.selected[state.mode]=button.getAttribute("data-smp-category");state.hoverIndex=null;state.locked=false;renderAll(true)})})
+    qsa("[data-smp-category]",grid).forEach(function(button){button.addEventListener("click",function(){state.selected[state.mode]=button.getAttribute("data-smp-category");state.simulation=null;state.hoverIndex=null;state.locked=false;renderAll(true)})})
   }
   function renderStats(){
     var item=windowStats(state.mode,stateValue());
@@ -842,12 +916,18 @@ Error generating stack: `+e.message+`
     qs("#smp-ranking").innerHTML=rankingRows().map(function(row){var tone=row.edge>=0?"smp-positive":"smp-negative";return '<tr><td class="smp-rank-name">'+safeText(row.value)+'</td><td>'+row.hits+'</td><td>'+percent(row.frequency)+'</td><td>'+percent(row.p0)+'</td><td class="'+tone+'">'+percent(row.shrink)+'</td><td>'+row.miss+'</td></tr>'}).join("")
   }
   function renderHistory(){
-    qs("#smp-history").innerHTML=specials.slice(-20).reverse().map(function(row){return '<tr><td>'+safeText(row.label)+'</td><td>'+safeText(row.date||"—")+'</td><td>'+pad(row.number)+'</td><td>'+safeText(row.zodiac)+'</td><td>'+safeText(row.group)+'</td><td>'+safeText(row.size)+'</td><td>'+safeText(row.parity)+'</td></tr>'}).join("")
+    qs("#smp-history").innerHTML=prefixRows().slice(-20).reverse().map(function(row){return '<tr><td>'+safeText(row.label)+'</td><td>'+safeText(row.date||"—")+'</td><td>'+pad(row.number)+'</td><td>'+safeText(row.zodiac)+'</td><td>'+safeText(row.group)+'</td><td>'+safeText(row.size)+'</td><td>'+safeText(row.parity)+'</td></tr>'}).join("")
   }
   function renderAnalysis(){
     var value=stateValue(),data=fullAnalysisData(state.mode,value),index=data.series.length-1,snapshot=technicalAt(data.series,data.boll,data.mac,index);
-    if(!snapshot)return;
-    var forward=walkForward(state.mode,value),grade=validationGrade(forward.results),historyText="完整"+specials.length+"期因果序列 · 60期预热";
+    if(!snapshot){
+      qs("#smp-analysis-title").textContent=value+" · 历史样本不足";
+      var emptyVerdict=qs("#smp-analysis-signal");emptyVerdict.className="smp-verdict smp-neutral";emptyVerdict.innerHTML='<span>下一柱技术形态观察（非开奖预测）</span><strong>历史样本不足</strong><b>至少需要21期真实前缀数据形成BOLL20与交叉判断</b><p>当前历史截止点之后的开奖记录已完全隐藏；不会沿用较新一期的指标。</p>';
+      qs("#smp-boll-metrics").innerHTML="";qs("#smp-analysis-evidence").innerHTML="";qs("#smp-forward-results").innerHTML="";
+      var emptyStatus=qs("#smp-analysis-status");emptyStatus.className="smp-analysis-status smp-watch";emptyStatus.textContent="样本不足 · 不研判";
+      qs("#smp-forward-summary").textContent="当前前缀只有"+data.series.length+"期，未达到技术指标与60期前推预热要求。";return
+    }
+    var forward=walkForward(state.mode,value),grade=validationGrade(forward.results),historyText="截至"+latestAtCutoff().label+"的"+data.series.length+"期因果序列 · 60期预热";
     var opinion;
     if(snapshot.direction===0&&snapshot.trendVote!==0&&snapshot.momentumVote===0)opinion="趋势"+(snapshot.trendVote>0?"偏强":"偏弱")+"但MACD未确认 · 等待确认";
     else if(snapshot.direction===0)opinion="趋势与动量分歧 · 未形成方向信号";
@@ -896,17 +976,22 @@ Error generating stack: `+e.message+`
     items.forEach(function(item,index){var x=getX(index),value=key?item[key]:item,y=getY(value);if(index)ctx.lineTo(x,y);else ctx.moveTo(x,y)});
     ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()
   }
-  function chartData(){
-    var value=stateValue(),fullSeries=buildSeriesForRows(specials,state.mode,value),fullCloses=fullSeries.map(function(row){return row.close});
-    var start=state.windowSize==="all"?0:Math.max(0,fullSeries.length-Math.min(Number(state.windowSize),fullSeries.length));
-    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,5).slice(start),ma10:movingAverage(fullCloses,10).slice(start),ma20:movingAverage(fullCloses,20).slice(start),mac:macd(fullCloses).slice(start)}
+  function simulatedRow(series,mode,value){
+    if(!state.simulation||!series.length)return null;
+    var meta=nextMeta(),last=series[series.length-1],hit=state.simulation==="hit",p0=baseline(mode,value,{date:meta.date}),close=last.close+Number(hit)-p0;
+    return {label:meta.label,date:meta.date,open:last.close,close:close,high:Math.max(last.close,close),low:Math.min(last.close,close),hit:hit,strength:Number(hit),p0:p0,omission:hit?0:last.omission+1,simulated:true}
   }
-  function fullAnalysisData(mode,value){var series=buildSeriesForRows(specials,mode,value),closes=series.map(function(row){return row.close});return {value:value,series:series,closes:closes,boll:bollinger(closes),mac:macd(closes)}}
+  function chartData(){
+    var value=stateValue(),rows=prefixRows(),actualSeries=buildSeriesForRows(rows,state.mode,value),actualCount=actualSeries.length,simulation=simulatedRow(actualSeries,state.mode,value),fullSeries=simulation?actualSeries.concat([simulation]):actualSeries;
+    var fullCloses=fullSeries.map(function(row){return row.close}),start=state.windowSize==="all"?0:Math.max(0,actualCount-Math.min(Number(state.windowSize),actualCount));
+    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,5).slice(start),ma10:movingAverage(fullCloses,10).slice(start),ma20:movingAverage(fullCloses,20).slice(start),mac:macd(fullCloses).slice(start),simulated:!!simulation,actualCount:actualCount}
+  }
+  function fullAnalysisData(mode,value){var series=buildSeriesForRows(prefixRows(),mode,value),closes=series.map(function(row){return row.close});return {value:value,series:series,closes:closes,boll:bollinger(closes),mac:macd(closes)}}
   function drawChart(scrollLatest){
     if(state.view!=="special")return;
     var canvas=qs("#smp-chart"),scroll=qs("#smp-chart-scroll"),stage=qs("#smp-chart-stage"),data=chartData(),series=data.series;
     if(!canvas||!scroll||!stage||!series.length||stage.offsetParent===null)return;
-    var longWindow=series.length>300;
+    var actualSeries=series.filter(function(row){return !row.simulated}),longWindow=actualSeries.length>300;
     var stageWidth=longWindow?Math.max(scroll.clientWidth,320):Math.max(scroll.clientWidth,Math.ceil(series.length*5));
     stage.style.width=stageWidth+"px";
     var cssWidth=Math.max(stage.clientWidth,320),cssHeight=Math.max(stage.clientHeight,320),ratio=Math.max(1,Math.min(2,window.devicePixelRatio||1));
@@ -923,9 +1008,10 @@ Error generating stack: `+e.message+`
     for(var grid=0;grid<6;grid+=1){var gridValue=high-(high-low)*grid/5,gy=yFor(gridValue);ctx.beginPath();ctx.moveTo(left,gy);ctx.lineTo(cssWidth-right,gy);ctx.stroke();ctx.fillText(gridValue.toFixed(1),left-7,gy+4)}
     if(low<0&&high>0){var zeroY=yFor(0);ctx.beginPath();ctx.moveTo(left,zeroY);ctx.lineTo(cssWidth-right,zeroY);ctx.strokeStyle="#f7c84388";ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([])}
     if(longWindow){
-      line(ctx,series,yFor,xFor,"#f7c843",1.7,"close")
+      line(ctx,actualSeries,yFor,xFor,"#f7c843",1.7,"close");
+      if(data.simulated&&series.length>1){var lastActualIndex=series.length-2;ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle="#ffe066";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(xFor(lastActualIndex),yFor(series[lastActualIndex].close));ctx.lineTo(xFor(series.length-1),yFor(series[series.length-1].close));ctx.stroke();ctx.restore()}
     }else{
-      series.forEach(function(row,index){var x=xFor(index),color=row.hit?"#ef5350":"#18a66a",open=yFor(row.open),close=yFor(row.close),barWidth=Math.max(2,step*.56);ctx.fillStyle=color;ctx.fillRect(x-barWidth/2,Math.min(open,close),barWidth,Math.max(1,Math.abs(close-open)))})
+      series.forEach(function(row,index){var x=xFor(index),color=row.hit?"#ef5350":"#18a66a",open=yFor(row.open),close=yFor(row.close),barWidth=Math.max(2,step*.56),barTop=Math.min(open,close),barHeight=Math.max(1,Math.abs(close-open));ctx.fillStyle=row.simulated?color+"99":color;ctx.fillRect(x-barWidth/2,barTop,barWidth,barHeight);if(row.simulated){ctx.save();ctx.setLineDash([3,2]);ctx.strokeStyle="#ffe066";ctx.lineWidth=1.5;ctx.strokeRect(x-barWidth/2-.5,barTop-.5,barWidth+1,barHeight+1);ctx.restore();ctx.fillStyle="#ffe066";ctx.textAlign="center";ctx.fillText("模拟",x,top+11)}})
     }
     if(state.overlay==="boll"){
       ctx.beginPath();
@@ -939,7 +1025,7 @@ Error generating stack: `+e.message+`
     if(state.lower==="macd"){
       var maxMagnitude=Math.max.apply(null,[.01].concat(data.mac.reduce(function(out,row){out.push(Math.abs(row.hist),Math.abs(row.dif),Math.abs(row.dea));return out},[]))),base=lowerTop+lowerHeight/2,mapMacd=function(value){return base-value/maxMagnitude*(lowerHeight*.43)};
       ctx.strokeStyle="#334966";ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(cssWidth-right,base);ctx.stroke();
-      data.mac.forEach(function(row,index){var x=xFor(index),barWidth=Math.max(2,step*.56),y=mapMacd(row.hist);ctx.fillStyle=row.hist>=0?"#ef5350":"#18a66a";ctx.fillRect(x-barWidth/2,Math.min(base,y),barWidth,Math.max(1,Math.abs(y-base)))});
+      data.mac.forEach(function(row,index){var x=xFor(index),barWidth=Math.max(2,step*.56),y=mapMacd(row.hist),sim=series[index]&&series[index].simulated,color=row.hist>=0?"#ef5350":"#18a66a";ctx.fillStyle=sim?color+"99":color;ctx.fillRect(x-barWidth/2,Math.min(base,y),barWidth,Math.max(1,Math.abs(y-base)))});
       line(ctx,data.mac,mapMacd,xFor,"#38bdf8",1.45,"dif");line(ctx,data.mac,mapMacd,xFor,"#f7c843",1.45,"dea");
       ctx.fillStyle="#7890ac";ctx.textAlign="left";ctx.fillText("MACD",left,lowerTop+9);ctx.fillText("DIF",91,lowerTop+9);ctx.fillStyle="#38bdf8";ctx.fillRect(82,lowerTop+2,5,5);ctx.fillStyle="#7890ac";ctx.fillText("DEA",125,lowerTop+9);ctx.fillStyle="#f7c843";ctx.fillRect(116,lowerTop+2,5,5)
     }else{
@@ -951,9 +1037,9 @@ Error generating stack: `+e.message+`
     ctx.fillStyle="#7890ac";ctx.textAlign="center";
     var labelCount=Math.min(10,series.length);
     for(var tick=0;tick<labelCount;tick+=1){var itemIndex=Math.round(tick*(series.length-1)/Math.max(1,labelCount-1)),x=xFor(itemIndex);ctx.save();ctx.translate(x,cssHeight-17);ctx.rotate(-.53);ctx.fillText(series[itemIndex].label,0,0);ctx.restore()}
-    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"三均线")+"与"+(state.lower==="macd"?"MACD":"强度／遗漏");
-    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前窗口"+series.length+"期");
-    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+series[0].label+"—"+series[series.length-1].label+"，共 "+series.length+" 期；技术指标只描述历史。";
+    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"三均线")+"与"+(state.lower==="macd"?"MACD":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
+    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
+    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名或前推成绩。":"；技术指标只描述历史。") ;
     if(scrollLatest&&series.length>60)requestAnimationFrame(function(){scroll.scrollLeft=Math.max(0,scroll.scrollWidth-scroll.clientWidth)})
   }
   function scheduleChart(scrollLatest){cancelAnimationFrame(chartFrame);chartFrame=requestAnimationFrame(function(){drawChart(!!scrollLatest)})}
@@ -963,22 +1049,22 @@ Error generating stack: `+e.message+`
     if(!series.length)return;
     index=Math.max(0,Math.min(series.length-1,index));state.hoverIndex=index;
     var row=series[index],mac=data.mac[index],movement=row.close-row.open,tip=qs("#smp-tip");
-    tip.innerHTML='<b>'+safeText(row.label)+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.hit?'实际出现':'未出现')+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+'</span>':'');
+    tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+'</span>':'');
     tip.hidden=false;updatePointButtons()
   }
   function pointAt(event){
-    var canvas=qs("#smp-chart"),series=buildSeries(stateValue());
+    var canvas=qs("#smp-chart"),series=chartData().series;
     if(!canvas||!series.length)return null;
     var bounds=canvas.getBoundingClientRect(),step=(bounds.width-70)/series.length,index=Math.floor((event.clientX-bounds.left-52)/step);
     return Math.max(0,Math.min(series.length-1,index))
   }
   function updatePointButtons(){
-    var length=currentWindow().length,index=state.hoverIndex;
+    var length=chartData().series.length,index=state.hoverIndex;
     var prev=qs('[data-smp-point="prev"]'),next=qs('[data-smp-point="next"]'),unlock=qs('[data-smp-point="unlock"]');
     if(prev)prev.disabled=index===0;if(next)next.disabled=index===length-1;if(unlock)unlock.disabled=!state.locked
   }
   function movePoint(direction){
-    var length=currentWindow().length,index=state.hoverIndex==null?length-1:state.hoverIndex;
+    var length=chartData().series.length,index=state.hoverIndex==null?length-1:state.hoverIndex;
     state.locked=true;renderTip(Math.max(0,Math.min(length-1,index+direction)))
   }
   function toggleFullscreen(){
@@ -989,11 +1075,11 @@ Error generating stack: `+e.message+`
   }
   function renderAll(scrollLatest){
     if(!specials.length)return;
-    renderModeControls();renderCategories();renderStats();renderRanking();renderAnalysis();updatePointButtons();scheduleChart(scrollLatest)
+    renderContextControls();renderModeControls();renderCategories();renderStats();renderRanking();renderAnalysis();renderHistory();updatePointButtons();scheduleChart(scrollLatest)
   }
   function bind(){
     qsa("[data-smp-view]").forEach(function(button){button.addEventListener("click",function(){setView(button.getAttribute("data-smp-view"))})});
-    qsa("[data-smp-mode]").forEach(function(button){button.addEventListener("click",function(){state.mode=button.getAttribute("data-smp-mode");stateValue();state.hoverIndex=null;state.locked=false;renderAll(true)})});
+    qsa("[data-smp-mode]").forEach(function(button){button.addEventListener("click",function(){state.mode=button.getAttribute("data-smp-mode");stateValue();state.simulation=null;state.hoverIndex=null;state.locked=false;renderAll(true)})});
     qsa("[data-smp-overlay]").forEach(function(button){button.addEventListener("click",function(){state.overlay=button.getAttribute("data-smp-overlay");renderAll(false)})});
     qsa("[data-smp-lower]").forEach(function(button){button.addEventListener("click",function(){state.lower=button.getAttribute("data-smp-lower");renderAll(false);if(state.hoverIndex!=null)renderTip(state.hoverIndex)})});
     var mobileTabs=qsa("[data-smp-mobile-view]");
@@ -1010,12 +1096,15 @@ Error generating stack: `+e.message+`
       })
     });
     qs("#smp-window-select").addEventListener("change",function(event){var raw=event.target.value;state.windowSize=raw==="all"?"all":Number(raw);state.hoverIndex=null;state.locked=false;renderAll(true)});
+    qs("#smp-history-select").addEventListener("change",function(event){setCutoff(Number(event.target.value))});
+    qsa("[data-smp-history]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-history");if(action==="prev")setCutoff(state.cutoffIndex-1);else if(action==="next")setCutoff(state.cutoffIndex+1);else setCutoff(specials.length-1)})});
+    qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true;renderContextControls();updatePointButtons();scheduleChart(true)})});
     qs("#smp-fullscreen").addEventListener("click",toggleFullscreen);
     var canvas=qs("#smp-chart");
     canvas.addEventListener("pointermove",function(event){if(!state.locked){var index=pointAt(event);if(index!=null)renderTip(index)}});
     canvas.addEventListener("pointerdown",function(event){var index=pointAt(event);if(index!=null){state.locked=!state.locked;renderTip(index)}});
     canvas.addEventListener("pointerleave",hideTip);
-    qsa("[data-smp-point]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-point");if(action==="prev")movePoint(-1);else if(action==="next")movePoint(1);else if(action==="latest"){state.locked=true;renderTip(currentWindow().length-1)}else{state.locked=false;state.hoverIndex=null;qs("#smp-tip").hidden=true;updatePointButtons()}})});
+    qsa("[data-smp-point]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-point");if(action==="prev")movePoint(-1);else if(action==="next")movePoint(1);else if(action==="latest"){state.locked=true;renderTip(chartData().series.length-1)}else{state.locked=false;state.hoverIndex=null;qs("#smp-tip").hidden=true;updatePointButtons()}})});
     document.addEventListener("keydown",function(event){if(event.key==="Escape"&&state.fullscreen)toggleFullscreen()});
     if("ResizeObserver" in window)new ResizeObserver(function(){scheduleChart(false)}).observe(qs("#smp-chart-scroll"));else window.addEventListener("resize",function(){scheduleChart(false)});
     if(window.matchMedia){var mobileQuery=window.matchMedia("(max-width:760px)"),syncMobile=function(){setMobileView(state.mobileView)};if(mobileQuery.addEventListener)mobileQuery.addEventListener("change",syncMobile);else if(mobileQuery.addListener)mobileQuery.addListener(syncMobile)}
@@ -1045,10 +1134,10 @@ Error generating stack: `+e.message+`
     var desiredView=requested||saved==="special"?"special":"main";
     try{
       specials=parseRows(globalThis.__MACAU_DRAWS__);
+      state.cutoffIndex=specials.length-1;
       var latest=specials[specials.length-1];
       state.selected.group=latest.group;state.selected.size=latest.size;state.selected.parity=latest.parity;
-      qs("#smp-live").textContent="数据截至 "+latest.label;
-      qs("#smp-source-status").innerHTML='<span>'+specials.length+'期数据已通过结构核验'+(skipped?' · 跳过 '+skipped+' 条无效记录':'')+' · 最新特码 '+pad(latest.number)+latest.zodiac+' · '+latest.group+'／'+latest.size+'／'+latest.parity+'</span><b>真实最新状态</b>';
+      qs("#smp-history-select").innerHTML=specials.map(function(row,index){return '<option value="'+index+'">'+safeText(row.label)+' · '+safeText(row.date||"日期未知")+'</option>'}).join("");
       renderHistory();setMobileView("chart");renderAll(false);setView(desiredView)
     }catch(error){showError(error&&error.message?error.message:"未知数据错误");setView("special")}
   }
