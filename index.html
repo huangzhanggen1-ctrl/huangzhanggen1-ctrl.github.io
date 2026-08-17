@@ -326,6 +326,7 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-chart-canvas-wrap{position:relative;min-width:0}
 #macau-special-panel .smp-chart-scroll{width:100%;position:relative;border:1px solid #1f334c;border-radius:11px;background:#09182a;overflow:auto hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;scrollbar-width:thin}
 #macau-special-panel .smp-chart-stage{min-width:100%;height:500px;position:relative}
+#macau-special-panel .smp-chart-stage.smp-double-lower{height:600px}
 #macau-special-panel #smp-chart{display:block;touch-action:pan-x pan-y pinch-zoom}
 #macau-special-panel .smp-tip{z-index:3;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;position:absolute;top:9px;left:9px;width:max-content;max-width:calc(100% - 18px);padding:7px 9px;border:1px solid #314965;border-radius:8px;background:#07111ef0;box-shadow:0 6px 18px #0007;color:#dce8f6;font-size:10px;line-height:1.45;overflow-wrap:anywhere;pointer-events:none}
 #macau-special-panel .smp-tip[hidden]{display:none}
@@ -403,6 +404,7 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-mobile-views{display:none}
 #macau-special-panel .smp-panel.smp-fullscreen{z-index:99999;position:fixed;inset:0;border:0;border-radius:0;background:var(--smp-bg);padding:12px;overflow:auto}
 #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-stage{height:max(440px,calc(100dvh - 210px))}
+#macau-special-panel .smp-panel.smp-fullscreen .smp-chart-stage.smp-double-lower{height:max(560px,calc(100dvh - 210px))}
 #macau-special-panel .smp-panel.smp-fullscreen .smp-scroll-hint,
 #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-below-controls{display:none}
 @media(min-width:761px){
@@ -443,6 +445,7 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-truth-badge{min-height:32px;font-size:12px}
  #macau-special-panel .smp-legend{flex-wrap:wrap;gap:7px;font-size:12px;overflow-x:visible}
  #macau-special-panel .smp-chart-stage{height:440px}
+ #macau-special-panel .smp-chart-stage.smp-double-lower{height:560px}
  #macau-special-panel .smp-tip{top:7px;left:7px;max-width:calc(100% - 14px);gap:5px 7px}
  #macau-special-panel .smp-chart-pick-bar{display:block;border-radius:9px}
  #macau-special-panel .smp-chart-pick-bar>b{display:block;margin-bottom:7px;font-size:13px}
@@ -496,6 +499,7 @@ Error generating stack: `+e.message+`
 }
 @media(orientation:landscape) and (max-height:600px){
  #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-stage{height:440px;min-height:440px}
+ #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-stage.smp-double-lower{height:560px;min-height:560px}
 }
 </style>
 <nav id="macau-special-switch" aria-label="走势图专区切换">
@@ -533,7 +537,7 @@ Error generating stack: `+e.message+`
     <div class="smp-panel-head">
       <div>
         <p>零漂移校正趋势</p>
-        <h2 id="smp-chart-title">家禽 K线、布林线与MACD</h2>
+        <h2 id="smp-chart-title">家禽 K线、布林线、MACD与KDJ</h2>
         <span class="smp-truth-badge">正式趋势视图 · 已扣除二分类理论漂移</span>
       </div>
       <div class="smp-actions">
@@ -566,7 +570,7 @@ Error generating stack: `+e.message+`
         <button type="button" data-smp-overlay="ma" aria-pressed="false">均线</button>
         <span class="smp-divider" aria-hidden="true"></span>
         <b>副图</b>
-        <button class="smp-on" type="button" data-smp-lower="macd" aria-pressed="true">MACD</button>
+        <button class="smp-on" type="button" data-smp-lower="macd" aria-pressed="true">MACD＋KDJ</button>
         <button type="button" data-smp-lower="omission" aria-pressed="false">强度／遗漏</button>
         <small id="smp-indicator-note">BOLL：紫上轨 · 黄中轨 · 蓝下轨</small>
       </div>
@@ -615,7 +619,7 @@ Error generating stack: `+e.message+`
         <button type="button" data-smp-point="unlock">解除锁定</button>
       </div>
     </div>
-    <p class="smp-scroll-hint" id="smp-chart-note">当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准；BOLL与MACD只描述历史形态。</p>
+    <p class="smp-scroll-hint" id="smp-chart-note">当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准；BOLL、MACD与KDJ只描述历史形态。</p>
     <div class="smp-chart-below-controls">
       <div class="smp-chart-pick-bar">
         <b id="smp-category-label">选择家禽／野兽</b>
@@ -670,7 +674,7 @@ Error generating stack: `+e.message+`
       </div>
     </section>
   </div>
-  <p class="smp-note">固定口径：家禽＝牛马羊鸡狗猪，野兽＝鼠虎兔龙蛇猴；1–24小、25–49大；奇数单、偶数双；0–4小尾、5–9大尾；阴肖＝鼠龙蛇马狗猪，阳肖＝牛虎兔羊猴鸡；合数单双按十位与个位之和判奇偶；白肖＝鼠牛虎鸡狗猪，黑肖＝兔龙蛇马羊猴；吉肖＝兔龙蛇马羊鸡，凶肖＝鼠牛虎猴狗猪。49固定归大尾、合单。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。用户自定义MA周期只改变图表显示，专业研判与严格前推继续固定使用MA5／10／20。K线、BOLL、MA、MACD与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
+  <p class="smp-note">固定口径：家禽＝牛马羊鸡狗猪，野兽＝鼠虎兔龙蛇猴；1–24小、25–49大；奇数单、偶数双；0–4小尾、5–9大尾；阴肖＝鼠龙蛇马狗猪，阳肖＝牛虎兔羊猴鸡；合数单双按十位与个位之和判奇偶；白肖＝鼠牛虎鸡狗猪，黑肖＝兔龙蛇马羊猴；吉肖＝兔龙蛇马羊鸡，凶肖＝鼠牛虎猴狗猪。49固定归大尾、合单。历史回看只读取截止期及以前的数据；下一期模拟柱只改变图形，不进入统计、排名、研判或前推成绩。用户自定义MA周期只改变图表显示，专业研判与严格前推继续固定使用MA5／10／20。KDJ(9,3,3)只作为图形确认层，不改变专家规则或前推成绩。K线、BOLL、MA、MACD、KDJ与下一柱技术形态观察只描述历史曲线状态，不等于下期开奖概率，也不构成中奖保证。</p>
 </section>
 <script id="macau-special-binary-script">
 (function(){
@@ -857,6 +861,16 @@ Error generating stack: `+e.message+`
       var dif=ema12-ema26;
       dea=index===0?dif:dea+(dif-dea)*2/10;
       return {dif:dif,dea:dea,hist:2*(dif-dea)}
+    })
+  }
+  function kdj(series){
+    var k=50,d=50;
+    return series.map(function(point,index){
+      var start=Math.max(0,index-8),lowest=Infinity,highest=-Infinity;
+      for(var cursor=start;cursor<=index;cursor+=1){lowest=Math.min(lowest,series[cursor].low);highest=Math.max(highest,series[cursor].high)}
+      var range=highest-lowest,rsv=range>1e-12?(point.close-lowest)/range*100:50;
+      k=(2*k+rsv)/3;d=(2*d+k)/3;
+      return {rsv:rsv,k:k,d:d,j:3*k-2*d,low:lowest,high:highest}
     })
   }
   function mean(values){return values.length?values.reduce(function(sum,value){return sum+value},0)/values.length:0}
@@ -1115,7 +1129,8 @@ Error generating stack: `+e.message+`
     qs("#smp-ranking-title").textContent=MODE[state.mode].title+"窗口排名";
     var visibleCount=currentWindow().length;
     qs("#smp-window-label").textContent=state.windowSize==="all"?"前缀全库 "+visibleCount+"期":"近"+visibleCount+"期";
-    qs("#smp-indicator-note").textContent=state.overlay==="boll"?"BOLL：紫上轨 · 黄中轨 · 蓝下轨":"MA：黄"+state.maPeriods[0]+"期 · 紫"+state.maPeriods[1]+"期 · 蓝"+state.maPeriods[2]+"期（仅图形）";
+    var mainIndicatorNote=state.overlay==="boll"?"BOLL：紫上轨 · 黄中轨 · 蓝下轨":"MA：黄"+state.maPeriods[0]+"期 · 紫"+state.maPeriods[1]+"期 · 蓝"+state.maPeriods[2]+"期（仅图形）";
+    qs("#smp-indicator-note").textContent=mainIndicatorNote+(state.lower==="macd"?" · 副图：MACD＋KDJ(9,3,3)":" · 副图：强度／遗漏");
     renderMaSettings()
   }
   function renderCategories(){
@@ -1208,7 +1223,7 @@ Error generating stack: `+e.message+`
     var fullCloses=fullSeries.map(function(row){return row.close}),start=state.windowSize==="all"?0:Math.max(0,actualCount-Math.min(Number(state.windowSize),actualCount)),expert=expertSignalData(state.mode,value),eventByIndex=Object.create(null);
     expert.events.forEach(function(event){eventByIndex[event.index]=event});
     var fullMarkers=actualSeries.map(function(row,index){return eventByIndex[index]||null});if(simulation)fullMarkers.push(null);
-    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,state.maPeriods[0]).slice(start),ma10:movingAverage(fullCloses,state.maPeriods[1]).slice(start),ma20:movingAverage(fullCloses,state.maPeriods[2]).slice(start),maPeriods:state.maPeriods.slice(),mac:macd(fullCloses).slice(start),expertMarkers:fullMarkers.slice(start),startIndex:start,simulated:!!simulation,actualCount:actualCount}
+    return {value:value,series:fullSeries.slice(start),closes:fullCloses.slice(start),boll:bollinger(fullCloses).slice(start),ma5:movingAverage(fullCloses,state.maPeriods[0]).slice(start),ma10:movingAverage(fullCloses,state.maPeriods[1]).slice(start),ma20:movingAverage(fullCloses,state.maPeriods[2]).slice(start),maPeriods:state.maPeriods.slice(),mac:macd(fullCloses).slice(start),kdj:kdj(fullSeries).slice(start),expertMarkers:fullMarkers.slice(start),startIndex:start,simulated:!!simulation,actualCount:actualCount}
   }
   function fullAnalysisData(mode,value){var series=buildSeriesForRows(prefixRows(),mode,value),closes=series.map(function(row){return row.close});return {value:value,series:series,closes:closes,boll:bollinger(closes),mac:macd(closes)}}
   function drawExpertMarker(ctx,event,row,x,yFor,top,plotBottom,step){
@@ -1225,13 +1240,21 @@ Error generating stack: `+e.message+`
     if(state.view!=="special")return;
     var canvas=qs("#smp-chart"),scroll=qs("#smp-chart-scroll"),stage=qs("#smp-chart-stage"),data=chartData(),series=data.series;
     if(!canvas||!scroll||!stage||!series.length||stage.offsetParent===null)return;
+    stage.classList.toggle("smp-double-lower",state.lower==="macd");
     var actualSeries=series.filter(function(row){return !row.simulated}),longWindow=actualSeries.length>300;
     var stageWidth=longWindow?Math.max(scroll.clientWidth,320):Math.max(scroll.clientWidth,Math.ceil(series.length*5));
     stage.style.width=stageWidth+"px";
     var cssWidth=Math.max(stage.clientWidth,320),cssHeight=Math.max(stage.clientHeight,320),ratio=Math.max(1,Math.min(2,window.devicePixelRatio||1));
     canvas.style.width=cssWidth+"px";canvas.style.height=cssHeight+"px";canvas.width=Math.round(cssWidth*ratio);canvas.height=Math.round(cssHeight*ratio);
     var ctx=canvas.getContext("2d");ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,cssWidth,cssHeight);
-    var left=52,right=18,plotBottom=cssHeight-104-88,top=25,lowerTop=plotBottom+9,lowerHeight=88,lowerBottom=lowerTop+lowerHeight;
+    var left=52,right=18,top=25,plotBottom,lowerTop,lowerHeight,lowerBottom,kdjTop=null,kdjHeight=0,kdjBottom=null;
+    if(state.lower==="macd"){
+      var bottomReserve=86,panelGap=9;lowerHeight=72;kdjHeight=84;
+      plotBottom=cssHeight-bottomReserve-panelGap*2-lowerHeight-kdjHeight;
+      lowerTop=plotBottom+panelGap;lowerBottom=lowerTop+lowerHeight;kdjTop=lowerBottom+panelGap;kdjBottom=kdjTop+kdjHeight
+    }else{
+      lowerHeight=88;plotBottom=cssHeight-104-lowerHeight;lowerTop=plotBottom+9;lowerBottom=lowerTop+lowerHeight
+    }
     var overlayValues=state.overlay==="boll"?data.boll.reduce(function(out,row){out.push(row.upper,row.mid,row.lower);return out},[]):[].concat(data.ma5,data.ma10,data.ma20);
     var values=series.reduce(function(out,row){out.push(row.open,row.close);return out},[]).concat(overlayValues).filter(Number.isFinite);
     var rawLow=Math.min.apply(null,values),rawHigh=Math.max.apply(null,values),margin=Math.max(.5,(rawHigh-rawLow)*.08),low=rawLow-margin,high=rawHigh+margin;
@@ -1268,7 +1291,14 @@ Error generating stack: `+e.message+`
       ctx.strokeStyle="#334966";ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(cssWidth-right,base);ctx.stroke();
       data.mac.forEach(function(row,index){var x=xFor(index),barWidth=Math.max(2,step*.56),y=mapMacd(row.hist),sim=series[index]&&series[index].simulated,color=row.hist>=0?"#ef5350":"#18a66a";ctx.fillStyle=sim?color+"99":color;ctx.fillRect(x-barWidth/2,Math.min(base,y),barWidth,Math.max(1,Math.abs(y-base)))});
       line(ctx,data.mac,mapMacd,xFor,"#38bdf8",1.45,"dif");line(ctx,data.mac,mapMacd,xFor,"#f7c843",1.45,"dea");
-      ctx.fillStyle="#7890ac";ctx.textAlign="left";ctx.fillText("MACD",left,lowerTop+9);ctx.fillText("DIF",91,lowerTop+9);ctx.fillStyle="#38bdf8";ctx.fillRect(82,lowerTop+2,5,5);ctx.fillStyle="#7890ac";ctx.fillText("DEA",125,lowerTop+9);ctx.fillStyle="#f7c843";ctx.fillRect(116,lowerTop+2,5,5)
+      ctx.fillStyle="#7890ac";ctx.textAlign="left";ctx.fillText("MACD",left,lowerTop+9);ctx.fillText("DIF",91,lowerTop+9);ctx.fillStyle="#38bdf8";ctx.fillRect(82,lowerTop+2,5,5);ctx.fillStyle="#7890ac";ctx.fillText("DEA",125,lowerTop+9);ctx.fillStyle="#f7c843";ctx.fillRect(116,lowerTop+2,5,5);
+      var kdjValues=data.kdj.reduce(function(out,row){out.push(row.k,row.d,row.j);return out},[]),kdjLow=Math.min.apply(null,[-20].concat(kdjValues))-5,kdjHigh=Math.max.apply(null,[120].concat(kdjValues))+5,mapKdj=function(value){return kdjTop+(kdjHigh-value)/(kdjHigh-kdjLow||1)*kdjHeight};
+      ctx.save();ctx.beginPath();ctx.rect(left,kdjTop,cssWidth-left-right,kdjHeight);ctx.clip();
+      ctx.fillStyle="#ef53500c";ctx.fillRect(left,kdjTop,cssWidth-left-right,Math.max(0,mapKdj(80)-kdjTop));ctx.fillStyle="#18a66a0c";ctx.fillRect(left,mapKdj(20),cssWidth-left-right,Math.max(0,kdjBottom-mapKdj(20)));
+      [20,50,80].forEach(function(level){var y=mapKdj(level);ctx.beginPath();ctx.moveTo(left,y);ctx.lineTo(cssWidth-right,y);ctx.strokeStyle=level===50?"#334966":"#64748b99";ctx.lineWidth=1;ctx.setLineDash(level===50?[]:[3,4]);ctx.stroke()});ctx.setLineDash([]);
+      var drawKdjLine=function(key,color,width){var realLength=data.simulated?Math.max(0,data.kdj.length-1):data.kdj.length;if(realLength)line(ctx,data.kdj.slice(0,realLength),mapKdj,xFor,color,width,key);if(data.simulated&&data.kdj.length>1){var last=data.kdj.length-1;ctx.save();ctx.beginPath();ctx.moveTo(xFor(last-1),mapKdj(data.kdj[last-1][key]));ctx.lineTo(xFor(last),mapKdj(data.kdj[last][key]));ctx.strokeStyle=color+"b8";ctx.lineWidth=width;ctx.setLineDash([4,3]);ctx.stroke();ctx.restore()}};
+      drawKdjLine("k","#38bdf8",longWindow?0.85:1.35);drawKdjLine("d","#f7c843",longWindow?0.85:1.35);drawKdjLine("j","#a78bfa",longWindow?0.75:1.15);ctx.restore();
+      ctx.fillStyle="#7890ac";ctx.textAlign="left";ctx.fillText("KDJ(9,3,3)",left,kdjTop+10);ctx.fillStyle="#38bdf8";ctx.fillRect(124,kdjTop+3,5,5);ctx.fillStyle="#7890ac";ctx.fillText("K",133,kdjTop+10);ctx.fillStyle="#f7c843";ctx.fillRect(151,kdjTop+3,5,5);ctx.fillStyle="#7890ac";ctx.fillText("D",160,kdjTop+10);ctx.fillStyle="#a78bfa";ctx.fillRect(178,kdjTop+3,5,5);ctx.fillStyle="#7890ac";ctx.fillText("J",187,kdjTop+10);ctx.fillText("20／80",203,kdjTop+10)
     }else{
       var lowerBase=lowerTop+lowerHeight*.48,omissionMax=Math.max.apply(null,[3].concat(series.map(function(row){return Math.min(row.omission,12)})));
       ctx.strokeStyle="#253a54";ctx.beginPath();ctx.moveTo(left,lowerBase);ctx.lineTo(cssWidth-right,lowerBase);ctx.stroke();
@@ -1278,9 +1308,9 @@ Error generating stack: `+e.message+`
     ctx.fillStyle="#7890ac";ctx.textAlign="center";
     var labelCount=Math.min(10,series.length);
     for(var tick=0;tick<labelCount;tick+=1){var itemIndex=Math.round(tick*(series.length-1)/Math.max(1,labelCount-1)),x=xFor(itemIndex);ctx.save();ctx.translate(x,cssHeight-17);ctx.rotate(-.53);ctx.fillText(series[itemIndex].label,0,0);ctx.restore()}
-    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"MA"+maLabel())+"与"+(state.lower==="macd"?"MACD":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
-    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(state.expertHints?"，已显示机会、停止与风险技术形态点":"")+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
-    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(state.expertHints?"；▲机会、■停止、▼风险均由当期收柱前缀因果识别，属于技术形态观察点。":"；专家提示已关闭。")+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名、专家提示或前推成绩。":"；技术指标只描述历史。") ;
+    qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"MA"+maLabel())+"与"+(state.lower==="macd"?"MACD＋KDJ":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
+    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(state.lower==="macd"?"，副图同时显示MACD与KDJ九三三":"")+(state.expertHints?"，已显示机会、停止与风险技术形态点":"")+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
+    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(state.lower==="macd"?"；MACD与KDJ(9,3,3)共用同一期号轴，KDJ仅作图形确认。":"")+(state.expertHints?"；▲机会、■停止、▼风险均由当期收柱前缀因果识别，属于技术形态观察点。":"；专家提示已关闭。")+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名、专家提示或前推成绩。":"；技术指标只描述历史。") ;
     if(scrollLatest&&series.length>60)requestAnimationFrame(function(){scroll.scrollLeft=Math.max(0,scroll.scrollWidth-scroll.clientWidth)})
   }
   function scheduleChart(scrollLatest){cancelAnimationFrame(chartFrame);chartFrame=requestAnimationFrame(function(){drawChart(!!scrollLatest)})}
@@ -1289,8 +1319,8 @@ Error generating stack: `+e.message+`
     var data=chartData(),series=data.series;
     if(!series.length)return;
     index=Math.max(0,Math.min(series.length-1,index));state.hoverIndex=index;
-    var row=series[index],mac=data.mac[index],movement=row.close-row.open,tip=qs("#smp-tip"),expert=data.expertMarkers&&data.expertMarkers[index],expertLabel=expert?(expert.type==="opportunity"?'▲机会观察点':expert.type==="stop"?'■停止观察点':'▼风险提醒点'):"";
-    tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+'</span>':'')+(expert?'<span>系统提示：'+safeText(expertLabel)+' · 对'+safeText(expert.nextLabel)+'</span><span>依据：'+safeText(expert.reasons.slice(0,2).join(' · '))+'</span>':'');
+    var row=series[index],mac=data.mac[index],kdjPoint=data.kdj[index],movement=row.close-row.open,tip=qs("#smp-tip"),expert=data.expertMarkers&&data.expertMarkers[index],expertLabel=expert?(expert.type==="opportunity"?'▲机会观察点':expert.type==="stop"?'■停止观察点':'▼风险提醒点'):"";
+    tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>MACD：DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+' · H '+mac.hist.toFixed(2)+'</span><span>KDJ：K '+kdjPoint.k.toFixed(2)+' · D '+kdjPoint.d.toFixed(2)+' · J '+kdjPoint.j.toFixed(2)+'</span>':'')+(expert?'<span>系统提示：'+safeText(expertLabel)+' · 对'+safeText(expert.nextLabel)+'</span><span>依据：'+safeText(expert.reasons.slice(0,2).join(' · '))+'</span>':'');
     tip.hidden=false;updatePointButtons()
   }
   function pointAt(event){
