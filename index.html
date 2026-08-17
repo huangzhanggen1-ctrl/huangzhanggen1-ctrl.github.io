@@ -1050,6 +1050,8 @@ Error generating stack: `+e.message+`
       reason="趋势与MACD机会状态仍在"+(data.latestRisk?"，同时出现“"+data.latestRisk.label+"”风险提醒":"")+"；"+snapshot.maState+"，"+snapshot.bollState+"，"+snapshot.histState+"。"
     }else if(currentEvent&&currentEvent.type==="stop"){
       tone="stop";status="■ 本期停止观察点";reason=currentEvent.reasons.join("；")+"。"
+    }else if((currentEvent&&currentEvent.type==="risk")||(data.phase!=="ACTIVE"&&data.latestRisk)){
+      tone="risk";status="▼ 风险回避中";reason=(data.latestRisk?data.latestRisk.label:currentEvent.reasons.join("；"))+"；"+snapshot.maState+"，"+snapshot.bollState+"，"+snapshot.histState+"。"
     }else if(snapshot.direction===-1){
       tone="risk";status="▼ 风险回避中";reason=(data.latestRisk?data.latestRisk.label:"负向共振")+"；"+snapshot.maState+"，"+snapshot.bollState+"，"+snapshot.histState+"。"
     }else{
