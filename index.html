@@ -323,11 +323,14 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-history-bar select{flex:1;min-width:210px}
 #macau-special-panel .smp-history-state{margin-left:auto;padding:5px 8px;border:1px solid #246449;border-radius:999px;background:#0d382b;color:#9be2bf;font-size:10px;font-weight:800;white-space:nowrap}
 #macau-special-panel .smp-history-state.smp-back{border-color:#8d7331;background:#3a3218;color:#ffe28a}
+#macau-special-panel .smp-chart-canvas-wrap{position:relative;min-width:0}
 #macau-special-panel .smp-chart-scroll{width:100%;position:relative;border:1px solid #1f334c;border-radius:11px;background:#09182a;overflow:auto hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom;scrollbar-width:thin}
 #macau-special-panel .smp-chart-stage{min-width:100%;height:500px;position:relative}
 #macau-special-panel #smp-chart{display:block;touch-action:pan-x pan-y pinch-zoom}
-#macau-special-panel .smp-tip{z-index:3;display:flex;align-items:center;gap:10px;position:absolute;top:8px;left:8px;padding:7px 9px;border:1px solid #314965;border-radius:8px;background:#07111eec;font-size:10px;pointer-events:none}
+#macau-special-panel .smp-tip{z-index:3;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;position:absolute;top:9px;left:9px;width:max-content;max-width:calc(100% - 18px);padding:7px 9px;border:1px solid #314965;border-radius:8px;background:#07111ef0;box-shadow:0 6px 18px #0007;color:#dce8f6;font-size:10px;line-height:1.45;overflow-wrap:anywhere;pointer-events:none}
 #macau-special-panel .smp-tip[hidden]{display:none}
+#macau-special-panel .smp-tip b,
+#macau-special-panel .smp-tip span{min-width:0;max-width:100%}
 #macau-special-panel .smp-tip span{color:#9db0c7}
 #macau-special-panel .smp-point-nav{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin-top:8px}
 #macau-special-panel .smp-scroll-hint{margin:7px 0 0;color:#98acc2;font-size:12px;line-height:1.65}
@@ -402,6 +405,9 @@ Error generating stack: `+e.message+`
 #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-stage{height:max(440px,calc(100dvh - 210px))}
 #macau-special-panel .smp-panel.smp-fullscreen .smp-scroll-hint,
 #macau-special-panel .smp-panel.smp-fullscreen .smp-chart-below-controls{display:none}
+@media(min-width:761px){
+ #macau-special-panel .smp-tip{left:58px;max-width:calc(100% - 67px)}
+}
 @media(max-width:900px){
  #macau-special-panel .smp-seg{grid-template-columns:repeat(4,minmax(0,1fr))}
  #macau-special-panel .smp-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -437,7 +443,7 @@ Error generating stack: `+e.message+`
  #macau-special-panel .smp-truth-badge{min-height:32px;font-size:12px}
  #macau-special-panel .smp-legend{flex-wrap:wrap;gap:7px;font-size:12px;overflow-x:visible}
  #macau-special-panel .smp-chart-stage{height:440px}
- #macau-special-panel .smp-tip{flex-wrap:wrap;gap:6px}
+ #macau-special-panel .smp-tip{top:7px;left:7px;max-width:calc(100% - 14px);gap:5px 7px}
  #macau-special-panel .smp-chart-pick-bar{display:block;border-radius:9px}
  #macau-special-panel .smp-chart-pick-bar>b{display:block;margin-bottom:7px;font-size:13px}
  #macau-special-panel .smp-picks{flex-wrap:wrap;overflow-x:visible}
@@ -596,10 +602,12 @@ Error generating stack: `+e.message+`
           <span id="smp-expert-stop"><b>停止：</b>共振失效或风险条件触发</span>
         </div>
       </aside>
-      <div class="smp-chart-scroll" id="smp-chart-scroll">
-        <div class="smp-chart-stage" id="smp-chart-stage"><canvas id="smp-chart" role="img" tabindex="0" aria-label="特码二分类历史校准K线图"></canvas></div>
+      <div class="smp-chart-canvas-wrap">
+        <div class="smp-chart-scroll" id="smp-chart-scroll">
+          <div class="smp-chart-stage" id="smp-chart-stage"><canvas id="smp-chart" role="img" tabindex="0" aria-label="特码二分类历史校准K线图"></canvas></div>
+        </div>
+        <div class="smp-tip" id="smp-tip" role="status" aria-live="polite" hidden></div>
       </div>
-      <div class="smp-tip" id="smp-tip" hidden></div>
       <div class="smp-point-nav" aria-label="K线柱导航">
         <button type="button" data-smp-point="prev">上一柱</button>
         <button type="button" data-smp-point="latest">锁定最新</button>
@@ -1077,10 +1085,10 @@ Error generating stack: `+e.message+`
   }
   function setCutoff(index){
     state.cutoffIndex=Math.max(0,Math.min(specials.length-1,Math.round(Number(index)||0)));
-    state.simulation=null;state.hoverIndex=null;state.locked=false;
-    var tip=qs("#smp-tip");if(tip)tip.hidden=true;
+    state.simulation=null;clearChartTip();
     renderAll(true)
   }
+  function clearChartTip(){state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true}
   function renderContextControls(){
     var row=latestAtCutoff(),rows=prefixRows(),isLatest=state.cutoffIndex===specials.length-1,meta=nextMeta(),simulation=state.simulation;
     if(!row)return;
@@ -1111,7 +1119,7 @@ Error generating stack: `+e.message+`
   function renderCategories(){
     var grid=qs("#smp-category-grid"),selected=stateValue();
     grid.innerHTML=MODE[state.mode].values.map(function(value){return '<button type="button" class="'+(value===selected?'smp-on':'')+'" data-smp-category="'+safeText(value)+'" aria-pressed="'+(value===selected?'true':'false')+'">'+safeText(value)+'</button>'}).join("");
-    qsa("[data-smp-category]",grid).forEach(function(button){button.addEventListener("click",function(){state.selected[state.mode]=button.getAttribute("data-smp-category");state.simulation=null;state.hoverIndex=null;state.locked=false;renderAll(true)})})
+    qsa("[data-smp-category]",grid).forEach(function(button){button.addEventListener("click",function(){state.selected[state.mode]=button.getAttribute("data-smp-category");state.simulation=null;clearChartTip();renderAll(true)})})
   }
   function renderStats(){
     var item=windowStats(state.mode,stateValue());
@@ -1310,7 +1318,7 @@ Error generating stack: `+e.message+`
   }
   function bind(){
     qsa("[data-smp-view]").forEach(function(button){button.addEventListener("click",function(){setView(button.getAttribute("data-smp-view"))})});
-    qsa("[data-smp-mode]").forEach(function(button){button.addEventListener("click",function(){state.mode=button.getAttribute("data-smp-mode");stateValue();state.simulation=null;state.hoverIndex=null;state.locked=false;renderAll(true)})});
+    qsa("[data-smp-mode]").forEach(function(button){button.addEventListener("click",function(){state.mode=button.getAttribute("data-smp-mode");stateValue();state.simulation=null;clearChartTip();renderAll(true)})});
     qsa("[data-smp-overlay]").forEach(function(button){button.addEventListener("click",function(){state.overlay=button.getAttribute("data-smp-overlay");renderAll(false)})});
     qsa("[data-smp-ma-action]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-ma-action");if(action==="reset")applyMaPeriods(DEFAULT_MA.slice(),true);else applyMaPeriods([qs("#smp-ma-fast").value,qs("#smp-ma-mid").value,qs("#smp-ma-slow").value],false)})});
     qsa("#smp-ma-settings input").forEach(function(input){input.addEventListener("keydown",function(event){if(event.key==="Enter"){event.preventDefault();qs('[data-smp-ma-action="apply"]').click()}})});
@@ -1329,10 +1337,10 @@ Error generating stack: `+e.message+`
         event.preventDefault();mobileTabs[next].focus();setMobileView(mobileTabs[next].getAttribute("data-smp-mobile-view"))
       })
     });
-    qs("#smp-window-select").addEventListener("change",function(event){var raw=event.target.value;state.windowSize=raw==="all"?"all":Number(raw);state.hoverIndex=null;state.locked=false;renderAll(true)});
+    qs("#smp-window-select").addEventListener("change",function(event){var raw=event.target.value;state.windowSize=raw==="all"?"all":Number(raw);clearChartTip();renderAll(true)});
     qs("#smp-history-select").addEventListener("change",function(event){setCutoff(Number(event.target.value))});
     qsa("[data-smp-history]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-history");if(action==="prev")setCutoff(state.cutoffIndex-1);else if(action==="next")setCutoff(state.cutoffIndex+1);else setCutoff(specials.length-1)})});
-    qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true;renderContextControls();renderExpertHint();updatePointButtons();scheduleChart(true)})});
+    qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;clearChartTip();renderContextControls();renderExpertHint();updatePointButtons();scheduleChart(true)})});
     qs("#smp-fullscreen").addEventListener("click",toggleFullscreen);
     var canvas=qs("#smp-chart");
     canvas.addEventListener("pointermove",function(event){if(!state.locked){var index=pointAt(event);if(index!=null)renderTip(index)}});
