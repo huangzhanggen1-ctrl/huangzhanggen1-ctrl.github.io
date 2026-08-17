@@ -703,10 +703,12 @@ Error generating stack: `+e.message+`
     fortune:{title:"凶吉肖",select:"选择凶吉肖",values:["吉肖","凶肖"],zodiac:true}
   };
   var DEFAULT_MA=[5,10,20];
-  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),expertHints:true,mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null,tailSize:null,yinYang:null,digitParity:null,blackWhite:null,fortune:null}};
+  var state={view:"main",mode:"group",windowSize:100,overlay:"boll",lower:"macd",maPeriods:DEFAULT_MA.slice(),expertHints:true,mobileView:"chart",fullscreen:false,hoverIndex:null,locked:false,crosshairValue:null,cutoffIndex:0,simulation:null,selected:{group:null,size:null,parity:null,tailSize:null,yinYang:null,digitParity:null,blackWhite:null,fortune:null}};
   var specials=[];
   var skipped=0;
   var chartFrame=0;
+  var chartMetrics=null;
+  var chartPointerStart=null;
   var expertCache={key:"",value:null};
   var rootOriginal={hidden:false,aria:null,ready:false};
   function qs(selector,root){return (root||document).querySelector(selector)}
@@ -1104,7 +1106,7 @@ Error generating stack: `+e.message+`
     state.simulation=null;clearChartTip();
     renderAll(true)
   }
-  function clearChartTip(){state.hoverIndex=null;state.locked=false;var tip=qs("#smp-tip");if(tip)tip.hidden=true}
+  function clearChartTip(){state.hoverIndex=null;state.locked=false;state.crosshairValue=null;chartPointerStart=null;var tip=qs("#smp-tip");if(tip)tip.hidden=true}
   function renderContextControls(){
     var row=latestAtCutoff(),rows=prefixRows(),isLatest=state.cutoffIndex===specials.length-1,meta=nextMeta(),simulation=state.simulation;
     if(!row)return;
@@ -1236,6 +1238,27 @@ Error generating stack: `+e.message+`
     if(step>=16){ctx.font="800 9px system-ui";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle=color;ctx.fillText(label,x,opportunity?Math.min(plotBottom-3,anchor+size+8):Math.max(top+3,anchor-size-7))}
     ctx.restore()
   }
+  function crosshairGeometry(metrics,index,value){
+    if(!metrics||!metrics.seriesLength||!Number.isFinite(value))return null;
+    var selected=Math.max(0,Math.min(metrics.seriesLength-1,Math.round(index))),clamped=Math.max(metrics.low,Math.min(metrics.high,value));
+    var x=metrics.left+metrics.step*(selected+.5),y=metrics.top+(metrics.high-clamped)/(metrics.high-metrics.low||1)*(metrics.plotBottom-metrics.top);
+    return {index:selected,value:value,plottedValue:clamped,x:x,y:Math.max(metrics.top,Math.min(metrics.plotBottom,y)),verticalTop:metrics.top,verticalBottom:metrics.kdjBottom==null?metrics.lowerBottom:metrics.kdjBottom,horizontalLeft:metrics.left,horizontalRight:metrics.cssWidth-metrics.right}
+  }
+  function drawLockedCrosshair(ctx,series,labelsOnly){
+    if(!state.locked||state.hoverIndex==null||!series.length)return;
+    var selected=Math.max(0,Math.min(series.length-1,state.hoverIndex)),row=series[selected],value=Number.isFinite(state.crosshairValue)?state.crosshairValue:row.close,guide=crosshairGeometry(chartMetrics,selected,value);
+    if(!guide)return;
+    ctx.save();
+    if(!labelsOnly){
+      ctx.strokeStyle="#91a8c1ad";ctx.lineWidth=1;ctx.setLineDash([3,4]);ctx.beginPath();ctx.moveTo(guide.x,guide.verticalTop);ctx.lineTo(guide.x,guide.verticalBottom);ctx.stroke();
+      ctx.setLineDash([6,4]);ctx.beginPath();ctx.moveTo(guide.horizontalLeft,guide.y);ctx.lineTo(guide.horizontalRight,guide.y);ctx.stroke();ctx.setLineDash([]);ctx.restore();return
+    }
+    var text="C "+(guide.value>=0?"+":"")+guide.value.toFixed(2);ctx.font="800 10px system-ui";ctx.textAlign="left";ctx.textBaseline="middle";
+    var width=Math.max(44,ctx.measureText(text).width+10),height=18,labelX=Math.max(4,Math.min(chartMetrics.cssWidth-width-4,chartMetrics.left-width-4)),labelY=Math.max(guide.verticalTop,Math.min(chartMetrics.plotBottom-height,guide.y-height/2));
+    ctx.fillStyle="#07111ef2";ctx.fillRect(labelX,labelY,width,height);ctx.fillStyle="#e6f2ff";ctx.fillText(text,labelX+5,labelY+height/2);
+    var period=String(row.label),periodWidth=Math.max(56,ctx.measureText(period).width+12),periodX=Math.max(4,Math.min(chartMetrics.cssWidth-periodWidth-4,guide.x-periodWidth/2)),periodY=Math.min(chartMetrics.cssHeight-height-4,guide.verticalBottom+6);
+    ctx.fillStyle="#07111ef2";ctx.fillRect(periodX,periodY,periodWidth,height);ctx.fillStyle="#e6f2ff";ctx.textAlign="center";ctx.fillText(period,periodX+periodWidth/2,periodY+height/2);ctx.restore()
+  }
   function drawChart(scrollLatest){
     if(state.view!=="special")return;
     var canvas=qs("#smp-chart"),scroll=qs("#smp-chart-scroll"),stage=qs("#smp-chart-stage"),data=chartData(),series=data.series;
@@ -1260,6 +1283,7 @@ Error generating stack: `+e.message+`
     var rawLow=Math.min.apply(null,values),rawHigh=Math.max.apply(null,values),margin=Math.max(.5,(rawHigh-rawLow)*.08),low=rawLow-margin,high=rawHigh+margin;
     if(low===high){low-=1;high+=1}
     var yFor=function(value){return top+(high-value)/(high-low||1)*(plotBottom-top)},step=(cssWidth-left-right)/series.length,xFor=function(index){return left+step*(index+.5)};
+    chartMetrics={cssWidth:cssWidth,cssHeight:cssHeight,left:left,right:right,top:top,plotBottom:plotBottom,lowerBottom:lowerBottom,kdjBottom:kdjBottom,low:low,high:high,step:step,seriesLength:series.length};
     ctx.fillStyle="#09182a";ctx.fillRect(0,0,cssWidth,cssHeight);ctx.font="11px system-ui";ctx.textBaseline="alphabetic";
     ctx.strokeStyle="#253a54";ctx.lineWidth=1;ctx.fillStyle="#7890ac";ctx.textAlign="right";
     for(var grid=0;grid<6;grid+=1){var gridValue=high-(high-low)*grid/5,gy=yFor(gridValue);ctx.beginPath();ctx.moveTo(left,gy);ctx.lineTo(cssWidth-right,gy);ctx.stroke();ctx.fillText(gridValue.toFixed(1),left-7,gy+4)}
@@ -1305,12 +1329,14 @@ Error generating stack: `+e.message+`
       series.forEach(function(row,index){var x=xFor(index),barWidth=Math.max(2,step*.5),strength=row.hit?lowerHeight*.42:0,miss=Math.min(row.omission,12)/omissionMax*(lowerHeight*.42);ctx.fillStyle="#ef5350";ctx.fillRect(x-barWidth/2,lowerBase-strength,barWidth,strength);ctx.fillStyle="#18a66a99";ctx.fillRect(x-barWidth/2,lowerBase,barWidth,miss)});
       ctx.fillStyle="#7890ac";ctx.textAlign="left";ctx.fillText("强度↑",left,lowerTop+8);ctx.fillText("遗漏↓",left,lowerBottom)
     }
+    drawLockedCrosshair(ctx,series,false);
     ctx.fillStyle="#7890ac";ctx.textAlign="center";
     var labelCount=Math.min(10,series.length);
     for(var tick=0;tick<labelCount;tick+=1){var itemIndex=Math.round(tick*(series.length-1)/Math.max(1,labelCount-1)),x=xFor(itemIndex);ctx.save();ctx.translate(x,cssHeight-17);ctx.rotate(-.53);ctx.fillText(series[itemIndex].label,0,0);ctx.restore()}
+    drawLockedCrosshair(ctx,series,true);
     qs("#smp-chart-title").textContent=data.value+" K线、"+(state.overlay==="boll"?"布林线":"MA"+maLabel())+"与"+(state.lower==="macd"?"MACD＋KDJ":"强度／遗漏")+(data.simulated?" · 模拟预览":"");
-    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(state.lower==="macd"?"，副图同时显示MACD与KDJ九三三":"")+(state.expertHints?"，已显示机会、停止与风险技术形态点":"")+(data.simulated?"加1根模拟柱，模拟完全不进入分析":""));
-    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(state.lower==="macd"?"；MACD与KDJ(9,3,3)共用同一期号轴，KDJ仅作图形确认。":"")+(state.expertHints?"；▲机会、■停止、▼风险均由当期收柱前缀因果识别，属于技术形态观察点。":"；专家提示已关闭。")+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名、专家提示或前推成绩。":"；技术指标只描述历史。") ;
+    canvas.setAttribute("aria-label",data.value+"的特码"+MODE[state.mode].title+"零漂移校正K线，当前"+actualSeries.length+"期真实数据"+(state.lower==="macd"?"，副图同时显示MACD与KDJ九三三":"")+(state.expertHints?"，已显示机会、停止与风险技术形态点":"")+(data.simulated?"加1根模拟柱，模拟完全不进入分析":"")+"；点按主K线可锁定十字线");
+    qs("#smp-chart-note").textContent="当前为零漂移趋势：累计命中减去逐期理论基准，0轴表示符合随机基准。显示 "+actualSeries[0].label+"—"+actualSeries[actualSeries.length-1].label+"，共 "+actualSeries.length+" 期真实数据"+(state.lower==="macd"?"；MACD与KDJ(9,3,3)共用同一期号轴，KDJ仅作图形确认。":"")+(state.expertHints?"；▲机会、■停止、▼风险均由当期收柱前缀因果识别，属于技术形态观察点。":"；专家提示已关闭。")+(data.simulated?"＋1根下一期模拟柱；模拟完全不进入研判、排名、专家提示或前推成绩。":"；技术指标只描述历史。")+"；点按主K线可锁定十字线。" ;
     if(scrollLatest&&series.length>60)requestAnimationFrame(function(){scroll.scrollLeft=Math.max(0,scroll.scrollWidth-scroll.clientWidth)})
   }
   function scheduleChart(scrollLatest){cancelAnimationFrame(chartFrame);chartFrame=requestAnimationFrame(function(){drawChart(!!scrollLatest)})}
@@ -1321,13 +1347,31 @@ Error generating stack: `+e.message+`
     index=Math.max(0,Math.min(series.length-1,index));state.hoverIndex=index;
     var row=series[index],mac=data.mac[index],kdjPoint=data.kdj[index],movement=row.close-row.open,tip=qs("#smp-tip"),expert=data.expertMarkers&&data.expertMarkers[index],expertLabel=expert?(expert.type==="opportunity"?'▲机会观察点':expert.type==="stop"?'■停止观察点':'▼风险提醒点'):"";
     tip.innerHTML='<b>'+safeText(row.label)+(row.simulated?' · 模拟':'')+'</b><span>'+(state.locked?'已锁定 · ':'')+(movement>=0?'上升＋'+movement.toFixed(2)+'格':'下降'+movement.toFixed(2)+'格')+'</span><span>开 '+row.open.toFixed(2)+' · 收 '+row.close.toFixed(2)+'</span><span>'+(row.simulated?(row.hit?'模拟开出':'模拟未开'):(row.hit?'实际出现':'未出现'))+'</span><span>遗漏 '+row.omission+'</span>'+(state.lower==="macd"?'<span>MACD：DIF '+mac.dif.toFixed(2)+' · DEA '+mac.dea.toFixed(2)+' · H '+mac.hist.toFixed(2)+'</span><span>KDJ：K '+kdjPoint.k.toFixed(2)+' · D '+kdjPoint.d.toFixed(2)+' · J '+kdjPoint.j.toFixed(2)+'</span>':'')+(expert?'<span>系统提示：'+safeText(expertLabel)+' · 对'+safeText(expert.nextLabel)+'</span><span>依据：'+safeText(expert.reasons.slice(0,2).join(' · '))+'</span>':'');
-    tip.hidden=false;updatePointButtons()
+    tip.hidden=false;updatePointButtons();if(state.locked)scheduleChart(false)
   }
-  function pointAt(event){
-    var canvas=qs("#smp-chart"),series=chartData().series;
-    if(!canvas||!series.length)return null;
-    var bounds=canvas.getBoundingClientRect(),step=(bounds.width-70)/series.length,index=Math.floor((event.clientX-bounds.left-52)/step);
-    return Math.max(0,Math.min(series.length-1,index))
+  function crosshairPointFromClient(metrics,bounds,clientX,clientY,mainOnly){
+    if(!metrics||!bounds||!metrics.seriesLength)return null;
+    var x=(clientX-bounds.left)*metrics.cssWidth/(bounds.width||1),y=(clientY-bounds.top)*metrics.cssHeight/(bounds.height||1);
+    if(x<metrics.left||x>metrics.cssWidth-metrics.right)return null;
+    var insideMain=y>=metrics.top&&y<=metrics.plotBottom;
+    if(mainOnly&&!insideMain)return null;
+    var index=Math.floor((x-metrics.left)/metrics.step),value=metrics.high-(Math.max(metrics.top,Math.min(metrics.plotBottom,y))-metrics.top)/(metrics.plotBottom-metrics.top||1)*(metrics.high-metrics.low);
+    return {index:Math.max(0,Math.min(metrics.seriesLength-1,index)),value:value,insideMain:insideMain}
+  }
+  function chartPointAt(event,mainOnly){
+    var canvas=qs("#smp-chart");
+    return canvas?crosshairPointFromClient(chartMetrics,canvas.getBoundingClientRect(),event.clientX,event.clientY,mainOnly):null
+  }
+  function revealLockedPoint(index){
+    var scroll=qs("#smp-chart-scroll"),metrics=chartMetrics;
+    if(!scroll||!metrics)return;
+    var x=metrics.left+metrics.step*(index+.5),margin=Math.min(44,scroll.clientWidth*.18),visibleLeft=scroll.scrollLeft+margin,visibleRight=scroll.scrollLeft+scroll.clientWidth-margin;
+    if(x<visibleLeft)scroll.scrollLeft=Math.max(0,x-margin);else if(x>visibleRight)scroll.scrollLeft=Math.min(Math.max(0,scroll.scrollWidth-scroll.clientWidth),x-scroll.clientWidth+margin)
+  }
+  function lockChartPoint(index,value){
+    var series=chartData().series;
+    if(!series.length)return;
+    var selected=Math.max(0,Math.min(series.length-1,index));state.locked=true;state.crosshairValue=Number.isFinite(value)?value:series[selected].close;renderTip(selected);requestAnimationFrame(function(){revealLockedPoint(selected)})
   }
   function updatePointButtons(){
     var length=chartData().series.length,index=state.hoverIndex;
@@ -1335,8 +1379,8 @@ Error generating stack: `+e.message+`
     if(prev)prev.disabled=index===0;if(next)next.disabled=index===length-1;if(unlock)unlock.disabled=!state.locked
   }
   function movePoint(direction){
-    var length=chartData().series.length,index=state.hoverIndex==null?length-1:state.hoverIndex;
-    state.locked=true;renderTip(Math.max(0,Math.min(length-1,index+direction)))
+    var series=chartData().series,length=series.length,index=state.hoverIndex==null?length-1:state.hoverIndex,target=Math.max(0,Math.min(length-1,index+direction));
+    lockChartPoint(target,series[target].close)
   }
   function toggleFullscreen(){
     state.fullscreen=!state.fullscreen;
@@ -1375,10 +1419,12 @@ Error generating stack: `+e.message+`
     qsa("[data-smp-sim]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-sim");state.simulation=action==="clear"?null:action;clearChartTip();renderContextControls();renderExpertHint();updatePointButtons();scheduleChart(true)})});
     qs("#smp-fullscreen").addEventListener("click",toggleFullscreen);
     var canvas=qs("#smp-chart");
-    canvas.addEventListener("pointermove",function(event){if(!state.locked){var index=pointAt(event);if(index!=null)renderTip(index)}});
-    canvas.addEventListener("pointerdown",function(event){var index=pointAt(event);if(index!=null){state.locked=!state.locked;renderTip(index)}});
-    canvas.addEventListener("pointerleave",hideTip);
-    qsa("[data-smp-point]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-point");if(action==="prev")movePoint(-1);else if(action==="next")movePoint(1);else if(action==="latest"){state.locked=true;renderTip(chartData().series.length-1)}else{state.locked=false;state.hoverIndex=null;qs("#smp-tip").hidden=true;updatePointButtons()}})});
+    canvas.addEventListener("pointermove",function(event){if(chartPointerStart&&chartPointerStart.id===event.pointerId){var dragX=event.clientX-chartPointerStart.x,dragY=event.clientY-chartPointerStart.y;if(dragX*dragX+dragY*dragY>64)chartPointerStart.moved=true}if(!state.locked&&event.pointerType==="mouse"){var point=chartPointAt(event,false);if(point)renderTip(point.index)}});
+    canvas.addEventListener("pointerdown",function(event){if(event.isPrimary===false||(event.pointerType==="mouse"&&event.button!==0))return;var point=chartPointAt(event,true);if(!point)return;chartPointerStart={id:event.pointerId,x:event.clientX,y:event.clientY,time:Date.now(),point:point}});
+    canvas.addEventListener("pointerup",function(event){var start=chartPointerStart;chartPointerStart=null;if(!start||start.id!==event.pointerId||start.moved||Date.now()-start.time>500)return;var dx=event.clientX-start.x,dy=event.clientY-start.y;if(dx*dx+dy*dy>64)return;var point=chartPointAt(event,true);if(point)lockChartPoint(point.index,point.value)});
+    canvas.addEventListener("pointercancel",function(){chartPointerStart=null});
+    canvas.addEventListener("pointerleave",function(){chartPointerStart=null;hideTip()});
+    qsa("[data-smp-point]").forEach(function(button){button.addEventListener("click",function(){var action=button.getAttribute("data-smp-point");if(action==="prev")movePoint(-1);else if(action==="next")movePoint(1);else if(action==="latest"){var series=chartData().series;lockChartPoint(series.length-1,series[series.length-1].close)}else{clearChartTip();updatePointButtons();scheduleChart(false)}})});
     document.addEventListener("keydown",function(event){if(event.key==="Escape"&&state.fullscreen)toggleFullscreen()});
     if("ResizeObserver" in window)new ResizeObserver(function(){scheduleChart(false)}).observe(qs("#smp-chart-scroll"));else window.addEventListener("resize",function(){scheduleChart(false)});
     if(window.matchMedia){var mobileQuery=window.matchMedia("(max-width:760px)"),syncMobile=function(){setMobileView(state.mobileView)};if(mobileQuery.addEventListener)mobileQuery.addEventListener("change",syncMobile);else if(mobileQuery.addListener)mobileQuery.addListener(syncMobile)}
