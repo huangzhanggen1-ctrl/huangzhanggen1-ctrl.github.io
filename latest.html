@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#071728" />
+<title>新澳门生肖尾数K线 · 最新数据</title>
+<style>
+html,body{margin:0;min-height:100%;background:#071728;color:#d9edff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#boot{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center}#boot strong{display:block;font-size:18px;margin-bottom:8px}#boot small{opacity:.72}
+</style>
+</head>
+<body>
+<div id="boot"><div><strong>正在载入最新K线数据…</strong><small>第230期 · 完整继承主页面全部功能</small></div></div>
+<script>
+(async()=>{
+  const latest={"label":"2026-230","date":"2026-08-18","nums":[28,26,47,14,49,10,16],"zodiac":["兔","蛇","猴","蛇","马","鸡","兔"]};
+  try{
+    const res=await fetch('./index.html?v=230',{cache:'no-store'});
+    if(!res.ok) throw new Error('主页面读取失败 '+res.status);
+    let html=await res.text();
+    const marker='globalThis.__MACAU_DRAWS__=[';
+    const start=html.indexOf(marker);
+    const end=html.indexOf('];</script>',start);
+    if(start<0||end<0) throw new Error('历史数据标记未找到');
+    const oldData=html.slice(start,end);
+    if(!oldData.includes('"label":"2026-230"')){
+      html=html.slice(0,end)+','+JSON.stringify(latest)+html.slice(end);
+    }
+    html=html.replace('离线单文件 · 截至2026-229 · 共960期 · 不经过chatgpt.site','离线单文件 · 截至2026-230 · 共961期 · 不经过chatgpt.site');
+    document.open();
+    document.write(html);
+    document.close();
+  }catch(err){
+    document.getElementById('boot').innerHTML='<div><strong>载入失败</strong><small>'+String(err.message||err)+'</small></div>';
+  }
+})();
+</script>
+</body>
+</html>
