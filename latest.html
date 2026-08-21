@@ -4,56 +4,77 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#071728">
-<title>新澳门K线 · 第231期手机版</title>
+<title>新澳门K线 · 可录入最新版</title>
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071728}
-#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#071728}
-#status{position:fixed;inset:0;display:grid;place-items:center;background:#071728;color:#d9edff;font:600 15px system-ui;z-index:2}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071728;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#app{position:fixed;inset:0;width:100%;height:100%;border:0;background:#071728}#status{position:fixed;inset:0;display:grid;place-items:center;background:#071728;color:#d9edff;font:600 15px system-ui;z-index:2;text-align:center;padding:24px}.entryBtn{position:fixed;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:20;border:1px solid #4aaddb;border-radius:999px;background:#176b96;color:#fff;padding:12px 16px;font-weight:900;box-shadow:0 8px 24px #0008}.entryBtn.hasLocal{background:#6d5718;border-color:#f7c843;color:#fff1a8}.backdrop{position:fixed;inset:0;z-index:30;background:#0009;display:grid;place-items:end center;padding:12px}.backdrop[hidden]{display:none}.sheet{width:min(620px,100%);max-height:88dvh;overflow:auto;border:1px solid #2c4462;border-radius:18px 18px 12px 12px;background:#0b1b2d;color:#eef5ff;padding:16px 14px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -16px 50px #0008}.sheetHead{display:flex;justify-content:space-between;gap:12px;align-items:center}.sheetHead h2{margin:0;font-size:18px}.close{border:1px solid #405975;border-radius:10px;background:#13263e;color:#dce8f6;min-width:44px;min-height:44px;font-size:20px}.meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.field{display:grid;gap:5px;color:#a8bad0;font-size:12px}.field input{width:100%;box-sizing:border-box;min-height:44px;border:1px solid #2d4664;border-radius:9px;background:#071522;color:#fff;padding:8px 10px;font-size:16px;font-weight:800}.numsTitle{margin:14px 0 8px;font-size:13px;color:#cbd9e8}.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.nums label{display:grid;gap:4px;color:#8199b4;font-size:10px}.nums input{width:100%;box-sizing:border-box;min-width:0;min-height:52px;border:1px solid #2d4664;border-radius:11px;background:#071522;color:#fff;text-align:center;font-size:21px;font-weight:900}.nums label:last-child{grid-column:span 2}.nums label:last-child input{border-color:#8d7331;background:#231f11;color:#ffe28a}.preview{margin-top:12px;padding:10px;border:1px solid #29415b;border-radius:10px;background:#081725;color:#9db1c8;font-size:12px;line-height:1.65}.preview.ok{border-color:#246449;color:#9be2bf}.preview.error{border-color:#8e3d43;color:#ffaaa8}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.actions button{min-height:48px;border-radius:10px;border:1px solid #2f4c6a;background:#13263e;color:#dce8f6;font-weight:900}.actions .save{background:#176b52;border-color:#36b37e;color:#fff}.actions .danger{background:#4b2025;border-color:#8e3d43;color:#ffcbc9}.history{margin-top:12px;border-top:1px solid #243a53;padding-top:10px;color:#8da3bb;font-size:11px;line-height:1.6}.history b{color:#dce8f6}@media(max-width:390px){.entryBtn{right:12px;bottom:calc(18px + env(safe-area-inset-bottom));padding:11px 13px}.nums{grid-template-columns:repeat(4,1fr)}.meta{grid-template-columns:1fr}.sheet{padding-left:11px;padding-right:11px}}
 </style>
 </head>
 <body>
-<div id="status">正在打开第231期完整K线…</div>
-<iframe id="app" title="新澳门生肖尾数K线第231期"></iframe>
+<div id="status">正在载入完整K线…</div>
+<iframe id="app" title="新澳门生肖尾数K线"></iframe>
+<button id="entryBtn" class="entryBtn" type="button">＋录入开奖</button>
+<div id="backdrop" class="backdrop" hidden>
+  <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="entryTitle">
+    <div class="sheetHead"><h2 id="entryTitle">手工录入新期开奖</h2><button id="close" class="close" type="button" aria-label="关闭">×</button></div>
+    <div class="meta">
+      <label class="field">期号<input id="period" inputmode="numeric" placeholder="例如232"></label>
+      <label class="field">日期<input id="date" type="date"></label>
+    </div>
+    <div class="numsTitle">依次填写6个正码＋1个特码</div>
+    <div id="nums" class="nums"></div>
+    <div id="preview" class="preview">填完7个号码后自动核验生肖与特码分类。</div>
+    <div class="actions"><button id="save" class="save" type="button">确认录入并刷新K线</button><button id="deleteLast" class="danger" type="button">删除最近手工一期</button></div>
+    <div id="history" class="history"></div>
+  </section>
+</div>
 <script>
 (function(){
-  const frame=document.getElementById('app');
-  const status=document.getElementById('status');
-  const params=new URLSearchParams(location.search);
-  const view=params.get('view');
-  frame.src='./?v=231-mobile-safe'+(view==='special'?'&view=special':'');
-  frame.addEventListener('load',function(){
+  'use strict';
+  const STORE='macau_user_draws_v1';
+  const BASE_PERIOD=231, BASE_COUNT=962, BASE_DATE='2026-08-19';
+  const BASE_NUMS=[39,46,23,11,8,13,20];
+  const zodiacMap2026={
+    1:'马',13:'马',25:'马',37:'马',49:'马',
+    12:'羊',24:'羊',36:'羊',48:'羊',11:'猴',23:'猴',35:'猴',47:'猴',10:'鸡',22:'鸡',34:'鸡',46:'鸡',
+    9:'狗',21:'狗',33:'狗',45:'狗',8:'猪',20:'猪',32:'猪',44:'猪',7:'鼠',19:'鼠',31:'鼠',43:'鼠',
+    6:'牛',18:'牛',30:'牛',42:'牛',5:'虎',17:'虎',29:'虎',41:'虎',4:'兔',16:'兔',28:'兔',40:'兔',
+    3:'龙',15:'龙',27:'龙',39:'龙',2:'蛇',14:'蛇',26:'蛇',38:'蛇'
+  };
+  const poultry=new Set(['牛','马','羊','鸡','狗','猪']);
+  const yin=new Set(['鼠','龙','蛇','马','狗','猪']);
+  const white=new Set(['鼠','牛','虎','鸡','狗','猪']);
+  const lucky=new Set(['兔','龙','蛇','马','羊','鸡']);
+  const frame=document.getElementById('app'),status=document.getElementById('status'),btn=document.getElementById('entryBtn');
+  const modal=document.getElementById('backdrop'),period=document.getElementById('period'),date=document.getElementById('date'),preview=document.getElementById('preview'),history=document.getElementById('history');
+  const numsWrap=document.getElementById('nums');
+  const numInputs=[];
+  for(let i=0;i<7;i++){const label=document.createElement('label');label.textContent=i<6?'正码'+(i+1):'特码';const input=document.createElement('input');input.inputMode='numeric';input.maxLength=2;input.placeholder='--';label.appendChild(input);numsWrap.appendChild(label);numInputs.push(input)}
+  const getLocal=()=>{try{const x=JSON.parse(localStorage.getItem(STORE)||'[]');return Array.isArray(x)?x:[]}catch{return[]}};
+  const setLocal=x=>localStorage.setItem(STORE,JSON.stringify(x));
+  const pad=n=>String(n).padStart(2,'0');
+  const addDays=(iso,days)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+days);return d.toISOString().slice(0,10)};
+  const classify=(number,z)=>{const digitSum=Math.floor(number/10)+number%10;return [poultry.has(z)?'家禽':'野兽',number<=24?'小':'大',number%2?'单':'双',number%10<=4?'小尾':'大尾',yin.has(z)?'阴肖':'阳肖',digitSum%2?'合单':'合双',white.has(z)?'白肖':'黑肖',lucky.has(z)?'吉肖':'凶肖']};
+  function latestMeta(){const list=getLocal();if(list.length){const r=list[list.length-1];return{period:Number(String(r.label).split('-').pop()),date:r.date,count:BASE_COUNT+list.length}}return{period:BASE_PERIOD,date:BASE_DATE,count:BASE_COUNT}}
+  function fillDefaults(){const m=latestMeta();period.value=m.period+1;date.value=addDays(m.date,1);numInputs.forEach(x=>x.value='');preview.className='preview';preview.textContent='填完7个号码后自动核验生肖与特码分类。';renderHistory()}
+  function validate(){const p=Number(period.value),vals=numInputs.map(x=>Number(x.value));const m=latestMeta();let errors=[];if(!Number.isInteger(p)||p<1)errors.push('期号无效');if(p!==m.period+1)errors.push('期号应连续为 '+(m.period+1));if(!date.value)errors.push('请选择日期');if(vals.some(n=>!Number.isInteger(n)||n<1||n>49))errors.push('7个号码必须是1–49整数');if(new Set(vals).size!==7)errors.push('7个号码不能重复');const z=vals.map(n=>zodiacMap2026[n]);if(z.some(v=>!v))errors.push('生肖映射失败');if(errors.length){preview.className='preview error';preview.textContent=errors.join('；');return null}const special=vals[6],sz=z[6],classes=classify(special,sz);preview.className='preview ok';preview.innerHTML='核验通过：'+vals.map((n,i)=>pad(n)+z[i]+(i===6?'（特码）':'')).join('、')+'<br>特码分类：'+classes.join('／');return{label:'2026-'+String(p).padStart(3,'0'),date:date.value,nums:vals,zodiac:z}}
+  numInputs.forEach(x=>x.addEventListener('input',()=>{x.value=x.value.replace(/\D/g,'').slice(0,2);if(numInputs.every(y=>y.value))validate()}));period.addEventListener('input',()=>numInputs.every(y=>y.value)&&validate());date.addEventListener('change',()=>numInputs.every(y=>y.value)&&validate());
+  function renderHistory(){const list=getLocal();btn.classList.toggle('hasLocal',!!list.length);btn.textContent=list.length?'＋录入开奖 · 本机'+list.length+'期':'＋录入开奖';history.innerHTML=list.length?'<b>本机手工数据：</b><br>'+list.map(r=>r.label+' · '+r.nums.map(pad).join(',')+'＋'+pad(r.nums[6])).join('<br>'):'当前没有本机手工追加数据。'}
+  function open(){fillDefaults();modal.hidden=false;setTimeout(()=>period.focus(),50)}
+  function close(){modal.hidden=true}
+  btn.addEventListener('click',open);document.getElementById('close').addEventListener('click',close);modal.addEventListener('click',e=>{if(e.target===modal)close()});
+  document.getElementById('save').addEventListener('click',()=>{const row=validate();if(!row)return;const list=getLocal();list.push(row);setLocal(list);close();loadPage()});
+  document.getElementById('deleteLast').addEventListener('click',()=>{const list=getLocal();if(!list.length){preview.className='preview error';preview.textContent='没有可删除的手工数据。';return}const removed=list.pop();setLocal(list);preview.className='preview ok';preview.textContent='已删除 '+removed.label+'，正在刷新K线。';setTimeout(()=>{close();loadPage()},350)});
+  async function loadPage(){
+    status.style.display='grid';status.textContent='正在载入完整K线…';
     try{
-      const d=frame.contentDocument;
-      if(!d)return;
-      const style=d.createElement('style');
-      style.id='mobile-safe-231';
-      style.textContent=`
-@media (max-width:760px){
-  .chartFrame .tip,
-  #macau-special-panel .smp-tip{
-    top:6px!important;left:6px!important;max-width:calc(100% - 12px)!important;
-    padding:5px 7px!important;gap:3px 6px!important;border-radius:7px!important;
-    font-size:9px!important;line-height:1.28!important;box-shadow:0 4px 12px #0006!important;
+      const response=await fetch('./index.html?base=231-local-entry',{cache:'no-store'});if(!response.ok)throw new Error('主页面 '+response.status);
+      let html=await response.text();const local=getLocal();
+      if(local.length){const marker='globalThis.__MACAU_DRAWS__=[';const start=html.indexOf(marker),end=html.indexOf('];</script>',start);if(start<0||end<0)throw new Error('历史数据标记未找到');html=html.slice(0,end)+','+local.map(r=>JSON.stringify(r)).join(',')+html.slice(end);const last=local[local.length-1],count=BASE_COUNT+local.length;html=html.replace(/离线单文件 · 截至2026-231 · 共962期 · 不经过chatgpt\.site/,'离线单文件 · 截至'+last.label+' · 共'+count+'期 · 本机手工追加'+local.length+'期');}
+      const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);const old=frame.dataset.url;frame.dataset.url=url;frame.src=url;if(old)URL.revokeObjectURL(old);
+      frame.onload=function(){try{const d=frame.contentDocument;if(d){const style=d.createElement('style');style.textContent='@media(max-width:760px){.chartFrame .tip,#macau-special-panel .smp-tip{top:6px!important;left:6px!important;max-width:calc(100% - 12px)!important;padding:5px 7px!important;gap:3px 6px!important;font-size:9px!important;line-height:1.28!important}.chartPanel,#macau-special-panel .smp-chart-panel{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}.chartPointNav,#macau-special-panel .smp-point-nav{position:relative;z-index:4;margin-bottom:12px!important}}';(d.head||d.documentElement).appendChild(style)}}catch(e){}status.style.display='none';renderHistory()};
+    }catch(e){status.innerHTML='载入失败<br><small style="opacity:.7">'+String(e.message||e)+'</small>'}
   }
-  .chartFrame .tip b,#macau-special-panel .smp-tip b{font-size:10px!important;line-height:1.25!important}
-  .chartFrame .tip span,#macau-special-panel .smp-tip span{font-size:9px!important;line-height:1.25!important}
-  .chartPanel,#macau-special-panel .smp-chart-panel{
-    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
-  }
-  .chartPointNav,#macau-special-panel .smp-point-nav{
-    position:relative;z-index:4;margin-bottom:12px!important;
-  }
-  .chartBelowControls,#macau-special-panel .smp-chart-below-controls{
-    scroll-margin-bottom:calc(110px + env(safe-area-inset-bottom));
-  }
-}
-@media (max-width:390px){
-  .chartFrame .tip,#macau-special-panel .smp-tip{font-size:8.5px!important;gap:2px 5px!important}
-}`;
-      (d.head||d.documentElement).appendChild(style);
-      status.style.display='none';
-    }catch(e){status.textContent='页面已载入；手机视觉修正未注入，请刷新一次。'}
-  });
+  renderHistory();loadPage();
 })();
 </script>
 </body>
