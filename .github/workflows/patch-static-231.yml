@@ -1,0 +1,72 @@
+name: Patch static K-line through 231
+
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-static-231.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Patch index and latest entry
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'globalThis.__MACAU_DRAWS__=['
+          start = s.find(marker)
+          if start < 0:
+              raise SystemExit('draw marker missing')
+          end = s.find('];</script>', start)
+          if end < 0:
+              raise SystemExit('draw array end missing')
+
+          additions = [
+              {"label":"2026-230","date":"2026-08-18","nums":[28,26,47,14,49,10,16],"zodiac":["兔","蛇","猴","蛇","马","鸡","兔"]},
+              {"label":"2026-231","date":"2026-08-19","nums":[39,46,23,11,8,13,20],"zodiac":["龙","鸡","猴","猴","猪","马","猪"]},
+          ]
+          data_region = s[start:end]
+          missing = [x for x in additions if ('"label":"'+x['label']+'"') not in data_region]
+          if missing:
+              payload = ',' + ','.join(json.dumps(x, ensure_ascii=False, separators=(',',':')) for x in missing)
+              s = s[:end] + payload + s[end:]
+
+          import re
+          s = re.sub(r'离线单文件 · 截至2026-\d{3} · 共\d+期 · 不经过chatgpt\.site',
+                     '离线单文件 · 截至2026-231 · 共962期 · 不经过chatgpt.site', s, count=1)
+          p.write_text(s, encoding='utf-8')
+
+          Path('latest.html').write_text('''<!doctype html>
+          <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="refresh" content="0;url=./?v=231"><title>打开最新版K线</title></head><body style="margin:0;background:#071728;color:#d9edff;font-family:system-ui;display:grid;place-items:center;min-height:100vh"><p>正在打开第231期最新版…</p><script>location.replace('./?v=231')</script></body></html>''', encoding='utf-8')
+      - name: Verify
+        shell: python
+        run: |
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert '"label":"2026-230"' in s
+          assert '"label":"2026-231"' in s
+          assert '截至2026-231 · 共962期' in s
+          assert 'MACD' in s and 'KDJ' in s
+          print('static page verification PASS')
+      - name: Commit patched static page
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html latest.html
+          if git diff --cached --quiet; then
+            echo "No changes needed"
+          else
+            git commit -m "Update static K-line data through draw 231"
+            git push origin HEAD:main
+          fi
