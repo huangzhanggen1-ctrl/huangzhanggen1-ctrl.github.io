@@ -1,4 +1,4 @@
-name: Patch static K-line through 231
+name: Patch static K-line through 232 and local sync
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
         shell: python
         run: |
           from pathlib import Path
-          import json
+          import json, re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
@@ -33,8 +33,7 @@ jobs:
               raise SystemExit('draw array end missing')
 
           additions = [
-              {"label":"2026-230","date":"2026-08-18","nums":[28,26,47,14,49,10,16],"zodiac":["兔","蛇","猴","蛇","马","鸡","兔"]},
-              {"label":"2026-231","date":"2026-08-19","nums":[39,46,23,11,8,13,20],"zodiac":["龙","鸡","猴","猴","猪","马","猪"]},
+              {"label":"2026-232","date":"2026-08-20","nums":[29,10,17,4,46,20,42],"zodiac":["虎","鸡","虎","兔","鸡","猪","牛"]},
           ]
           data_region = s[start:end]
           missing = [x for x in additions if ('"label":"'+x['label']+'"') not in data_region]
@@ -42,23 +41,53 @@ jobs:
               payload = ',' + ','.join(json.dumps(x, ensure_ascii=False, separators=(',',':')) for x in missing)
               s = s[:end] + payload + s[end:]
 
-          import re
           s = re.sub(r'离线单文件 · 截至2026-\d{3} · 共\d+期 · 不经过chatgpt\.site',
-                     '离线单文件 · 截至2026-231 · 共962期 · 不经过chatgpt.site', s, count=1)
+                     '离线单文件 · 截至2026-232 · 共963期 · 不经过chatgpt.site', s, count=1)
+
+          bridge = '''<script id="macau-local-draw-bridge">(function(){try{var key="macau_user_draws_v1",base=Array.isArray(globalThis.__MACAU_DRAWS__)?globalThis.__MACAU_DRAWS__:[],local=JSON.parse(localStorage.getItem(key)||"[]");if(!Array.isArray(local))local=[];var map=new Map(base.map(function(row){return[row.label,row]})),accepted=[];local.forEach(function(row){if(!row||typeof row.label!=="string"||!Array.isArray(row.nums)||row.nums.length!==7||!Array.isArray(row.zodiac)||row.zodiac.length!==7)return;if(map.has(row.label))return;map.set(row.label,row);accepted.push(row.label)});globalThis.__MACAU_DRAWS__=Array.from(map.values()).sort(function(a,b){return String(a.label).localeCompare(String(b.label))});globalThis.__MACAU_LOCAL_LABELS__=accepted;}catch(error){console.warn("local draw merge skipped",error)}})();</script>'''
+          if 'id="macau-local-draw-bridge"' not in s:
+              draw_close = s.find('];</script>', start)
+              insert_at = draw_close + len('];</script>')
+              s = s[:insert_at] + bridge + s[insert_at:]
+
           p.write_text(s, encoding='utf-8')
 
-          Path('latest.html').write_text('''<!doctype html>
-          <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="refresh" content="0;url=./?v=231"><title>打开最新版K线</title></head><body style="margin:0;background:#071728;color:#d9edff;font-family:system-ui;display:grid;place-items:center;min-height:100vh"><p>正在打开第231期最新版…</p><script>location.replace('./?v=231')</script></body></html>''', encoding='utf-8')
+          latest = Path('latest.html')
+          t = latest.read_text(encoding='utf-8')
+          t = re.sub(r"const BASE=\{period:\d+,label:'2026-\d{3}',date:'[^']+',count:\d+,nums:\[[^\]]+\],zodiac:\[[^\]]+\]\};",
+                     "const BASE={period:232,label:'2026-232',date:'2026-08-20',count:963,nums:[29,10,17,4,46,20,42],zodiac:['虎','鸡','虎','兔','鸡','猪','牛']};", t, count=1)
+          t = re.sub(r'src="\./\?v=[^"]+"', 'src="./?v=232-stable-direct"', t, count=1)
+          t = t.replace('正式数据截至2026-231','正式数据截至2026-232')
+          t = t.replace("const getLocal=()=>{try{const x=JSON.parse(localStorage.getItem(STORE)||'[]');return Array.isArray(x)?x:[]}catch{return[]}};",
+                        "const getLocal=()=>{try{const x=JSON.parse(localStorage.getItem(STORE)||'[]');if(!Array.isArray(x))return[];return x.filter(r=>Number(String(r.label||'').split('-').pop())>BASE.period)}catch{return[]}};")
+          t = t.replace("(r.local?'本机最新 · 待同步正式K线':'正式数据')+' · '+r.label",
+                        "(r.local?'本机运行数据 · K线已同步':'正式数据')+' · '+r.label")
+          t = t.replace("(r.local?'本机待同步':'正式数据')",
+                        "(r.local?'本机运行数据':'正式数据')")
+          t = t.replace('录入后顶部卡立即更新；正式K线仍以正式库为准。','录入后顶部卡与整套K线同时更新并重算。')
+          t = t.replace('手工录入会先保存为“本机待同步”；等正式库写入后再转为正式数据，避免假装已经重算。','手工录入保存为“本机运行数据”，主页面会从同域本地库合并后重载，因此十二生肖、0–9尾、特码专区及全部技术指标同步重算；正式库出现同一期时自动以正式数据为准并去重。')
+          t = t.replace("document.getElementById('save').onclick=()=>{const row=validate();if(!row)return;const l=getLocal();l.push(row);setLocal(l);modal.hidden=true;renderTop()};",
+                        "document.getElementById('save').onclick=()=>{const row=validate();if(!row)return;const l=getLocal();l.push(row);setLocal(l);modal.hidden=true;renderTop();document.getElementById('app').src='./?v=local-'+Date.now()};")
+          t = t.replace("document.getElementById('deleteLast').onclick=()=>{const l=getLocal();if(!l.length){preview.className='preview error';preview.textContent='没有可删除的本机手工数据。';return}l.pop();setLocal(l);renderTop();fill()};",
+                        "document.getElementById('deleteLast').onclick=()=>{const l=getLocal();if(!l.length){preview.className='preview error';preview.textContent='没有可删除的本机手工数据。';return}l.pop();setLocal(l);renderTop();fill();document.getElementById('app').src='./?v=local-'+Date.now()};")
+          latest.write_text(t, encoding='utf-8')
+
       - name: Verify
         shell: python
         run: |
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
-          assert '"label":"2026-230"' in s
+          t=Path('latest.html').read_text(encoding='utf-8')
           assert '"label":"2026-231"' in s
-          assert '截至2026-231 · 共962期' in s
+          assert '"label":"2026-232"' in s
+          assert '截至2026-232 · 共963期' in s
+          assert 'macau-local-draw-bridge' in s
+          assert 'macau_user_draws_v1' in s
+          assert "period:232,label:'2026-232'" in t
+          assert "K线已同步" in t
+          assert "local-'+Date.now()" in t
           assert 'MACD' in s and 'KDJ' in s
-          print('static page verification PASS')
+          print('draw 232 + local runtime sync verification PASS')
       - name: Commit patched static page
         run: |
           git config user.name "github-actions[bot]"
@@ -67,6 +96,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes needed"
           else
-            git commit -m "Update static K-line data through draw 231"
+            git commit -m "Update K-line through draw 232 and sync local entries"
             git push origin HEAD:main
           fi
