@@ -28,7 +28,6 @@ jobs:
 <style id="mobile-chart-ui-231-patch">
 /* MOBILE_CHART_UI_231_PATCH: visual-only mobile ergonomics; no indicator/model logic */
 @media (max-width:760px){
-  /* Compact locked-point cards in both comprehensive and special charts. */
   .chartFrame .tip,
   #macau-special-panel .smp-tip{
     top:6px!important;
@@ -51,8 +50,6 @@ jobs:
     font-size:9px!important;
     line-height:1.25!important;
   }
-
-  /* Give iPhone in-app/browser bottom overlays enough scroll clearance. */
   .chartPanel,
   #macau-special-panel .smp-chart-panel{
     padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
@@ -77,9 +74,7 @@ jobs:
 }
 </style>
 '''
-              # Later than all prior chart styles so overrides are deterministic.
               s = s.replace('</body>', css + '\n</body>', 1)
-          # Improve crosshair contrast in both canvas implementations; visual only.
           s = s.replace("#91a8c1ad", "#b8cbe0d9")
           s = s.replace('"#91a8c1ad"', '"#b8cbe0d9"')
           p.write_text(s, encoding='utf-8')
@@ -99,3 +94,5 @@ jobs:
           git add index.html .github/workflows/one-shot-mobile-chart-ui.yml
           git commit -m 'Improve mobile chart lock card and bottom controls'
           git push origin HEAD:main
+
+# trigger: 2026-08-21-mobile-ui
