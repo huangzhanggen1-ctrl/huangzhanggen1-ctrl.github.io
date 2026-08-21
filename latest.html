@@ -10,23 +10,28 @@ html,body{margin:0;min-height:100%;background:#071728;color:#d9edff;font-family:
 </style>
 </head>
 <body>
-<div id="boot"><div><strong>正在载入最新K线数据…</strong><small>第230期 · 完整继承主页面全部功能</small></div></div>
+<div id="boot"><div><strong>正在载入最新K线数据…</strong><small>第231期 · 完整继承主页面全部功能</small></div></div>
 <script>
 (async()=>{
-  const latest={"label":"2026-230","date":"2026-08-18","nums":[28,26,47,14,49,10,16],"zodiac":["兔","蛇","猴","蛇","马","鸡","兔"]};
+  const updates=[
+    {"label":"2026-230","date":"2026-08-18","nums":[28,26,47,14,49,10,16],"zodiac":["兔","蛇","猴","蛇","马","鸡","兔"]},
+    {"label":"2026-231","date":"2026-08-19","nums":[39,46,23,11,8,13,20],"zodiac":["龙","鸡","猴","猴","猪","马","猪"]}
+  ];
   try{
-    const res=await fetch('./index.html?v=230',{cache:'no-store'});
+    const res=await fetch('./index.html?v=231',{cache:'no-store'});
     if(!res.ok) throw new Error('主页面读取失败 '+res.status);
     let html=await res.text();
     const marker='globalThis.__MACAU_DRAWS__=[';
     const start=html.indexOf(marker);
     const end=html.indexOf('];</script>',start);
     if(start<0||end<0) throw new Error('历史数据标记未找到');
-    const oldData=html.slice(start,end);
-    if(!oldData.includes('"label":"2026-230"')){
-      html=html.slice(0,end)+','+JSON.stringify(latest)+html.slice(end);
+    let insert='';
+    const dataBlock=html.slice(start,end);
+    for(const row of updates){
+      if(!dataBlock.includes('"label":"'+row.label+'"')) insert+=','+JSON.stringify(row);
     }
-    html=html.replace('离线单文件 · 截至2026-229 · 共960期 · 不经过chatgpt.site','离线单文件 · 截至2026-230 · 共961期 · 不经过chatgpt.site');
+    if(insert) html=html.slice(0,end)+insert+html.slice(end);
+    html=html.replace(/离线单文件 · 截至2026-229 · 共960期 · 不经过chatgpt\.site|离线单文件 · 截至2026-230 · 共961期 · 不经过chatgpt\.site/g,'离线单文件 · 截至2026-231 · 共962期 · 不经过chatgpt.site');
     document.open();
     document.write(html);
     document.close();
