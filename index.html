@@ -2,4 +2,7 @@
 permalink: /
 ---
 {% capture base_page %}{% include base231.html %}{% endcapture %}
-{{ base_page | replace_first: '<body>', '<body><script src="./bootstrap-data.js?v=233-datefix-3623122c"></script>' }}
+{% assign patched_page = base_page | replace: "ctx.fillText('指标' + (slot + 1), width - right, panelTop + 9);", "" %}
+{% assign patched_page = patched_page | replace: '<button type="button" id="smp-expert-toggle" class="smp-on" data-smp-expert aria-pressed="true" aria-controls="smp-expert-card smp-chart">专家提示：开</button>', '' %}
+{% assign patched_page = patched_page | replace: '<button type="button" data-smp-overlay="ma" aria-pressed="false">均线</button>', '<button type="button" data-smp-overlay="ma" aria-pressed="false">均线</button><button type="button" id="smp-expert-toggle" class="smp-on" data-smp-expert aria-pressed="true" aria-controls="smp-expert-card smp-chart">专家提示：开</button>' %}
+{{ patched_page | replace_first: '<body>', '<body><script src="./bootstrap-data.js?v=233-datefix-3623122c"></script>' }}
