@@ -39,9 +39,8 @@ function startLocalServer() {
   return new Promise((resolve, reject) => {
     server = http.createServer((req, res) => {
       const raw = decodeURIComponent((req.url || '/').split('?')[0]);
-      // IMPORTANT: '/' is the K-line application, not latest.html.
-      // latest.html is only the outer shell. This prevents iframe recursion.
-      const rel = raw === '/' ? '/index.html' : raw;
+      // '/' is always the actual K-line page. latest.html is only the outer shell.
+      const rel = raw === '/' ? '/main.html' : raw;
       const file = path.resolve(root, '.' + rel);
       if (!(file === root || file.startsWith(root + path.sep))) {
         res.writeHead(403); res.end('Forbidden'); return;
@@ -56,7 +55,7 @@ function startLocalServer() {
       });
     });
     server.on('error', reject);
-    // Fixed origin is deliberate: localStorage must survive application restarts.
+    // Fixed port = fixed origin, so manual draw data survives app restarts.
     server.listen(PORT, HOST, () => resolve(`http://${HOST}:${PORT}/latest.html`));
   });
 }
