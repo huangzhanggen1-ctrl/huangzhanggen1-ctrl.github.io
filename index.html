@@ -5,4 +5,4 @@ permalink: /
 {% assign patched_page = base_page | replace: "ctx.fillText('指标' + (slot + 1), width - right, panelTop + 9);", "" %}
 {% assign patched_page = patched_page | replace: '<button type="button" id="smp-expert-toggle" class="smp-on" data-smp-expert aria-pressed="true" aria-controls="smp-expert-card smp-chart">专家提示：开</button>', '' %}
 {% assign patched_page = patched_page | replace: '<button type="button" data-smp-overlay="ma" aria-pressed="false">均线</button>', '<button type="button" data-smp-overlay="ma" aria-pressed="false">均线</button><button type="button" id="smp-expert-toggle" class="smp-on" data-smp-expert aria-pressed="true" aria-controls="smp-expert-card smp-chart">专家提示：开</button>' %}
-{{ patched_page | replace_first: '<body>', '<body><script src="./bootstrap-data.js?v=236-all-bca23942"></script>' }}
+{{ patched_page | replace_first: '<body>', '<body><script src="./bootstrap-data.js?v=236-all-bca23942"></script><script>(function(){try{if(parent!==window){var d=parent.document,b=d.getElementById("close"),m=d.getElementById("backdrop");if(b&&m){b.onclick=function(e){if(e)e.preventDefault();m.hidden=true;};}}}catch(e){}})();</script>' }}
