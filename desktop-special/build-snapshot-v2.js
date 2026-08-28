@@ -19,9 +19,14 @@ if (!source.includes(oldEditorPatch)) throw new Error('Unable to replace editor 
 source = source.replace(oldEditorPatch, newEditorPatch);
 
 const oldRenderPatch = `r('renderMaSettings()\\n  }', 'renderMaSettings();renderCustomGroups()\\n  }', 'render custom groups');`;
-const newRenderPatch = `r('renderMaSettings()\\n  }\\n  function renderCategories(){', 'renderMaSettings();renderCustomGroups()\\n  }\\n  function renderCategories(){', 'render custom groups');`;
+const newRenderPatch = `r('renderMaSettings()', 'renderMaSettings();renderCustomGroups()', 'render custom groups');`;
 if (!source.includes(oldRenderPatch)) throw new Error('Unable to replace custom render anchor');
 source = source.replace(oldRenderPatch, newRenderPatch);
+
+const oldInitPatch = `r('function init(){\\n    bind();', 'function init(){\\n    loadCustomGroups();bind();', 'load custom groups');`;
+const newInitPatch = `r('function init(){', 'function init(){loadCustomGroups();', 'load custom groups');`;
+if (!source.includes(oldInitPatch)) throw new Error('Unable to replace custom init anchor');
+source = source.replace(oldInitPatch, newInitPatch);
 
 const temp = path.join(__dirname, '.build-snapshot-v2-runtime.js');
 fs.writeFileSync(temp, source, 'utf8');
