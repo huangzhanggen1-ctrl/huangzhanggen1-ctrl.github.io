@@ -1,0 +1,59 @@
+name: Build Windows Special Column
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'special-desktop.html'
+      - 'bootstrap-data.js'
+      - 'desktop-special/**'
+      - '.github/workflows/build-windows-special.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare standalone special page snapshot
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path desktop-special/app | Out-Null
+          $url = 'https://huangzhanggen1-ctrl.github.io/special-desktop.html?v=' + '${{ github.sha }}'
+          $ok = $false
+          for ($i=0; $i -lt 30; $i++) {
+            try {
+              Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile desktop-special/app/index.html
+              $text = Get-Content desktop-special/app/index.html -Raw
+              if ($text -match 'data-smp-mode="custom"' -and $text -match '自定义生肖编组') { $ok = $true; break }
+            } catch {}
+            Start-Sleep -Seconds 10
+          }
+          if (-not $ok) { throw 'Deployed standalone special page with custom grouping was not ready in time.' }
+          Invoke-WebRequest -UseBasicParsing -Uri ('https://huangzhanggen1-ctrl.github.io/bootstrap-data.js?v=' + '${{ github.sha }}') -OutFile desktop-special/app/bootstrap-data.js
+
+      - name: Install desktop dependencies
+        working-directory: desktop-special
+        run: npm install --no-audit --no-fund
+
+      - name: Build Windows installer
+        working-directory: desktop-special
+        run: npm run dist:win
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: XinMacau-Special-Kline-V7.0-Windows-Installer
+          path: desktop-special/release/*.exe
+          if-no-files-found: error
+          retention-days: 90
