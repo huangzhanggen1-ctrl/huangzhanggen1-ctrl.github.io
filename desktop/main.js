@@ -3,7 +3,22 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+const HOST = '127.0.0.1';
+const PORT = 17861;
 let server;
+let mainWindow;
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return;
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.show();
+    mainWindow.focus();
+  });
+}
 
 function contentType(file) {
   const ext = path.extname(file).toLowerCase();
@@ -20,13 +35,15 @@ function contentType(file) {
 }
 
 function startLocalServer() {
-  const root = path.join(__dirname, 'app');
+  const root = path.resolve(__dirname, 'app');
   return new Promise((resolve, reject) => {
     server = http.createServer((req, res) => {
       const raw = decodeURIComponent((req.url || '/').split('?')[0]);
-      const rel = raw === '/' ? '/latest.html' : raw;
-      const file = path.normalize(path.join(root, rel));
-      if (!file.startsWith(root)) {
+      // IMPORTANT: '/' is the K-line application, not latest.html.
+      // latest.html is only the outer shell. This prevents iframe recursion.
+      const rel = raw === '/' ? '/index.html' : raw;
+      const file = path.resolve(root, '.' + rel);
+      if (!(file === root || file.startsWith(root + path.sep))) {
         res.writeHead(403); res.end('Forbidden'); return;
       }
       fs.readFile(file, (err, data) => {
@@ -39,16 +56,14 @@ function startLocalServer() {
       });
     });
     server.on('error', reject);
-    server.listen(0, '127.0.0.1', () => {
-      const address = server.address();
-      resolve(`http://127.0.0.1:${address.port}/latest.html`);
-    });
+    // Fixed origin is deliberate: localStorage must survive application restarts.
+    server.listen(PORT, HOST, () => resolve(`http://${HOST}:${PORT}/latest.html`));
   });
 }
 
 async function createWindow() {
   const url = await startLocalServer();
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1440,
     height: 960,
     minWidth: 980,
@@ -61,11 +76,15 @@ async function createWindow() {
       sandbox: true
     }
   });
-  win.setMenuBarVisibility(false);
-  await win.loadURL(url);
+  mainWindow.setMenuBarVisibility(false);
+  await mainWindow.loadURL(url);
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(createWindow).catch(error => {
+  console.error(error);
+  app.quit();
+});
 app.on('window-all-closed', () => {
   if (server) server.close();
   if (process.platform !== 'darwin') app.quit();
