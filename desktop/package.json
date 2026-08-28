@@ -1,6 +1,6 @@
 {
   "name": "xin-macau-kline-desktop",
-  "version": "7.0.0",
+  "version": "7.0.1",
   "description": "新澳门K线 V7.0 桌面版",
   "main": "main.js",
   "author": "新澳门K线",
@@ -16,21 +16,11 @@
   "build": {
     "appId": "com.xinaomen.kline",
     "productName": "新澳门K线 V7.0",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "main.js",
-      "app/**/*"
-    ],
+    "directories": {"output": "release"},
+    "files": ["main.js", "app/**/*"],
     "asar": true,
     "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ],
+      "target": [{"target": "nsis", "arch": ["x64"]}],
       "artifactName": "XinMacauKline-V7.0-Windows-Setup-${version}.${ext}"
     },
     "nsis": {
