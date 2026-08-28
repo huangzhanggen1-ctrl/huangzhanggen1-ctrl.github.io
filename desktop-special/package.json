@@ -1,0 +1,34 @@
+{
+  "name": "xin-macau-special-kline-desktop",
+  "version": "7.0.0",
+  "description": "新澳门特码专栏 V7.0 独立桌面版",
+  "main": "main.js",
+  "author": "新澳门K线",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "dist:win": "electron-builder --win nsis --x64"
+  },
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.xinaomen.specialkline",
+    "productName": "新澳门特码专栏 V7.0",
+    "directories": {"output": "release"},
+    "files": ["main.js","app/**/*"],
+    "asar": true,
+    "win": {
+      "target": [{"target":"nsis","arch":["x64"]}],
+      "artifactName": "XinMacau-Special-Kline-V7.0-Windows-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "新澳门特码专栏 V7.0"
+    }
+  }
+}
