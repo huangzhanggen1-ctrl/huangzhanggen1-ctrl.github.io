@@ -37,12 +37,14 @@ jobs:
           $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
           Invoke-WebRequest -UseBasicParsing -Uri "https://huangzhanggen1-ctrl.github.io/latest.html?v=special-$stamp" -OutFile "desktop-special/app/latest.html"
           Copy-Item "desktop/shell-fixes.js" "desktop-special/app/shell-fixes.js" -Force
+          Copy-Item "desktop-special/membership-button.js" "desktop-special/app/membership-button.js" -Force
           $latest = Get-Content "desktop-special/app/latest.html" -Raw
           $latest = [regex]::Replace($latest, 'src="\./\?v=[^"]*"', 'src="./index.html"', 1)
-          $latest = $latest -replace '</body>', '<script src="./shell-fixes.js"></script></body>'
+          $latest = $latest -replace '</body>', '<script src="./shell-fixes.js"></script><script src="./membership-button.js"></script></body>'
           Set-Content -Path "desktop-special/app/latest.html" -Value $latest -Encoding UTF8
           if ((Get-Content "desktop-special/app/latest.html" -Raw) -notmatch 'src="./index.html"') { throw 'Special shell iframe target was not fixed.' }
           if ((Get-Content "desktop-special/app/latest.html" -Raw) -notmatch 'shell-fixes.js') { throw 'Special shell fixes were not injected.' }
+          if ((Get-Content "desktop-special/app/latest.html" -Raw) -notmatch 'membership-button.js') { throw 'Membership button was not injected.' }
 
       - name: Install desktop dependencies
         working-directory: desktop-special
