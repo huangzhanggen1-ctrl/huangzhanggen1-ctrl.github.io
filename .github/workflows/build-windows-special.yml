@@ -5,8 +5,10 @@ on:
     branches: [main]
     paths:
       - 'special-desktop.html'
+      - 'latest.html'
       - 'bootstrap-data.js'
       - '_includes/base231.html'
+      - 'desktop/shell-fixes.js'
       - 'desktop-special/**'
       - '.github/workflows/build-windows-special.yml'
   workflow_dispatch:
@@ -28,6 +30,19 @@ jobs:
 
       - name: Build and verify standalone special snapshot
         run: node desktop-special/build-snapshot-v2.js
+
+      - name: Prepare persistent latest shell
+        shell: pwsh
+        run: |
+          $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+          Invoke-WebRequest -UseBasicParsing -Uri "https://huangzhanggen1-ctrl.github.io/latest.html?v=special-$stamp" -OutFile "desktop-special/app/latest.html"
+          Copy-Item "desktop/shell-fixes.js" "desktop-special/app/shell-fixes.js" -Force
+          $latest = Get-Content "desktop-special/app/latest.html" -Raw
+          $latest = [regex]::Replace($latest, 'src="\./\?v=[^"]*"', 'src="./index.html"', 1)
+          $latest = $latest -replace '</body>', '<script src="./shell-fixes.js"></script></body>'
+          Set-Content -Path "desktop-special/app/latest.html" -Value $latest -Encoding UTF8
+          if ((Get-Content "desktop-special/app/latest.html" -Raw) -notmatch 'src="./index.html"') { throw 'Special shell iframe target was not fixed.' }
+          if ((Get-Content "desktop-special/app/latest.html" -Raw) -notmatch 'shell-fixes.js') { throw 'Special shell fixes were not injected.' }
 
       - name: Install desktop dependencies
         working-directory: desktop-special
