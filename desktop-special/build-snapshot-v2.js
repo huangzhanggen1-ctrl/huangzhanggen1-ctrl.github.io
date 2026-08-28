@@ -35,3 +35,34 @@ try {
 } finally {
   try { fs.unlinkSync(temp); } catch {}
 }
+
+// Add the multi-profile management layer only to the standalone desktop build.
+const appDir = path.join(__dirname, 'app');
+const appHtml = path.join(appDir, 'index.html');
+let html = fs.readFileSync(appHtml, 'utf8');
+if (!html.includes('id="smp-custom-groups"')) throw new Error('Custom group editor missing before profile injection');
+if (!html.includes('data-smp-custom-action="save"')) throw new Error('Legacy save control missing before profile injection');
+if (!html.includes('</body>')) throw new Error('Unable to inject profile manager script');
+html = html.replace('</body>', '<script src="./custom-profiles.js?v=profiles-v1"></script></body>');
+fs.writeFileSync(appHtml, html, 'utf8');
+fs.copyFileSync(path.join(__dirname, 'custom-profiles.js'), path.join(appDir, 'custom-profiles.js'));
+
+const verifyHtml = fs.readFileSync(appHtml, 'utf8');
+const verifyJs = fs.readFileSync(path.join(appDir, 'custom-profiles.js'), 'utf8');
+[
+  'custom-profiles.js?v=profiles-v1',
+  'id="smp-custom-groups"',
+  'data-smp-mode="custom"',
+  'data-smp-period="5"'
+].forEach(token => { if (!verifyHtml.includes(token)) throw new Error('Desktop profile snapshot verification failed: ' + token); });
+[
+  'macau-special-custom-zodiac-profiles-v1',
+  '方案名称',
+  '已保存组合',
+  '新建组合',
+  '重命名',
+  '删除组合',
+  '保存方案',
+  '当前方案：'
+].forEach(token => { if (!verifyJs.includes(token)) throw new Error('Profile manager verification failed: ' + token); });
+console.log('Standalone special-column snapshot + named profile manager built and verified.');
