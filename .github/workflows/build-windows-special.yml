@@ -27,7 +27,7 @@ jobs:
           node-version: '22'
 
       - name: Build and verify standalone special snapshot
-        run: node desktop-special/build-snapshot.js
+        run: node desktop-special/build-snapshot-v2.js
 
       - name: Install desktop dependencies
         working-directory: desktop-special
