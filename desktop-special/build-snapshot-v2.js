@@ -13,6 +13,11 @@ const oldBaselinePatch = `r('if(mode==="group")return DOMESTIC.length/12;', 'if(
 if (!source.includes(oldBaselinePatch)) throw new Error('Unable to remove obsolete baseline patch');
 source = source.replace(oldBaselinePatch, '');
 
+const oldEditorPatch = `r('</section>\\n  <div class="smp-data-status" id="smp-source-status"', '</section>'+editor+'<div class="smp-data-status" id="smp-source-status"', 'custom group editor');`;
+const newEditorPatch = `r('<div class="smp-data-status" id="smp-source-status"', editor+'<div class="smp-data-status" id="smp-source-status"', 'custom group editor');`;
+if (!source.includes(oldEditorPatch)) throw new Error('Unable to replace editor insertion patch');
+source = source.replace(oldEditorPatch, newEditorPatch);
+
 const temp = path.join(__dirname, '.build-snapshot-v2-runtime.js');
 fs.writeFileSync(temp, source, 'utf8');
 try {
