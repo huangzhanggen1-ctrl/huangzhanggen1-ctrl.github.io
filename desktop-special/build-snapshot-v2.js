@@ -18,6 +18,11 @@ const newEditorPatch = `r('<div class="smp-data-status" id="smp-source-status"',
 if (!source.includes(oldEditorPatch)) throw new Error('Unable to replace editor insertion patch');
 source = source.replace(oldEditorPatch, newEditorPatch);
 
+const oldRenderPatch = `r('renderMaSettings()\\n  }', 'renderMaSettings();renderCustomGroups()\\n  }', 'render custom groups');`;
+const newRenderPatch = `r('renderMaSettings()\\n  }\\n  function renderCategories(){', 'renderMaSettings();renderCustomGroups()\\n  }\\n  function renderCategories(){', 'render custom groups');`;
+if (!source.includes(oldRenderPatch)) throw new Error('Unable to replace custom render anchor');
+source = source.replace(oldRenderPatch, newRenderPatch);
+
 const temp = path.join(__dirname, '.build-snapshot-v2-runtime.js');
 fs.writeFileSync(temp, source, 'utf8');
 try {
