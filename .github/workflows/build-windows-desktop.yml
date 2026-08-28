@@ -1,0 +1,52 @@
+name: Build Windows Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'desktop/**'
+      - '.github/workflows/build-windows-desktop.yml'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare packaged web snapshot
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path desktop/app | Out-Null
+          $stamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
+          Invoke-WebRequest -UseBasicParsing -Uri "https://huangzhanggen1-ctrl.github.io/latest.html?v=desktop-$stamp" -OutFile "desktop/app/latest.html"
+          Invoke-WebRequest -UseBasicParsing -Uri "https://huangzhanggen1-ctrl.github.io/?v=desktop-$stamp" -OutFile "desktop/app/main.html"
+          Invoke-WebRequest -UseBasicParsing -Uri "https://huangzhanggen1-ctrl.github.io/bootstrap-data.js?v=desktop-$stamp" -OutFile "desktop/app/bootstrap-data.js"
+          $latest = Get-Content "desktop/app/latest.html" -Raw
+          $latest = [regex]::Replace($latest, 'src="\./\?v=[^"]*"', 'src="./main.html"', 1)
+          Set-Content -Path "desktop/app/latest.html" -Value $latest -Encoding UTF8
+          $main = Get-Content "desktop/app/main.html" -Raw
+          $main = $main -replace '<script src="\./bootstrap-data\.js\?v=[^"]+"></script>', '<script src="./bootstrap-data.js"></script>'
+          Set-Content -Path "desktop/app/main.html" -Value $main -Encoding UTF8
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Build Windows installer
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run dist:win
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: XinMacauKline-V7.0-Windows-Installer
+          path: desktop/release/*.exe
+          if-no-files-found: error
