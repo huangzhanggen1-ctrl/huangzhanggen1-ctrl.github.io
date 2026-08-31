@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Verify all classification partitions
+        run: node desktop-special/verify-classification-spec.js
+
       - name: Build and verify standalone special snapshot
         run: node desktop-special/build-snapshot-v2.js
 
