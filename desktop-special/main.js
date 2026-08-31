@@ -128,7 +128,9 @@ function startLocalServer(){
           const body=await readBody(req);const params=new URLSearchParams(body);const result=activateToken(params.get('token')||'');
           redirect(res,'/__license?m='+encodeURIComponent(result.ok?'激活成功':result.error||'激活失败'));return;
         }
-        if(u.pathname==='/latest.html'&&!currentLicense().ok){redirect(res,'/__license');return;}
+        // Membership is a hard gate for the entire embedded application, not only latest.html.
+        // An unlicensed user must not be able to bypass the gate by browsing index.html or assets directly.
+        if(!currentLicense().ok){redirect(res,'/__license');return;}
         const raw=decodeURIComponent(u.pathname);
         const rel=raw==='/'?'/index.html':raw;
         const file=path.resolve(root,'.'+rel);
