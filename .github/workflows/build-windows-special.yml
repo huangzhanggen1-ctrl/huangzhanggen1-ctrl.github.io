@@ -54,10 +54,48 @@ jobs:
         working-directory: desktop-special
         run: npm run dist:win
 
+      - name: Split installer for reliable handoff
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem "desktop-special/release/*.exe" | Select-Object -First 1
+          if (-not $exe) { throw 'Installer not found for split.' }
+          $bytes = [System.IO.File]::ReadAllBytes($exe.FullName)
+          $cut = [Math]::Ceiling($bytes.Length / 2)
+          [System.IO.File]::WriteAllBytes("desktop-special/release/member-installer.part1", $bytes[0..($cut-1)])
+          [System.IO.File]::WriteAllBytes("desktop-special/release/member-installer.part2", $bytes[$cut..($bytes.Length-1)])
+          $sha = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
+          Set-Content "desktop-special/release/member-installer.sha256.txt" "$sha  $($exe.Name)" -Encoding ASCII
+          Write-Host "Installer bytes: $($bytes.Length)"
+          Write-Host "SHA256: $sha"
+
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
           name: XinMacau-Special-Kline-V7.0-Windows-Installer
           path: desktop-special/release/*.exe
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload installer part 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: XinMacau-Special-Kline-V7.0-Member-Part1
+          path: desktop-special/release/member-installer.part1
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload installer part 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: XinMacau-Special-Kline-V7.0-Member-Part2
+          path: desktop-special/release/member-installer.part2
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload installer checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: XinMacau-Special-Kline-V7.0-Member-SHA256
+          path: desktop-special/release/member-installer.sha256.txt
           if-no-files-found: error
           retention-days: 90
