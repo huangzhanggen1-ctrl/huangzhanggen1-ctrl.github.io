@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('fs');
+const path=require('path');
+const spec=require('./classification-spec');
+spec.validateAll();
+const payload={fixed:spec.FIXED,fiveElements:spec.FIVE_ELEMENTS,meta:spec.familyMeta};
+const out=`(function(g){'use strict';\nvar DATA=${JSON.stringify(payload)};\nfunction inGroup(table,n){n=Number(n);if(!Number.isInteger(n)||n<1||n>49)return null;for(var k in table){if(table[k].indexOf(n)>=0)return k}return null}\nfunction classifyFixed(family,n){var t=DATA.fixed[family];return t?inGroup(t,n):null}\nfunction classifyFiveElement(year,n){var t=DATA.fiveElements[String(year)]||DATA.fiveElements[Number(year)];return t?inGroup(t,n):null}\nfunction classifyNumber(n,date){var year=Number(String(date||'').slice(0,4));return {wave:classifyFixed('wave',n),head:classifyFixed('head',n),middleEdge:classifyFixed('middleEdge',n),heavenEarth:classifyFixed('heavenEarth',n),highLow:classifyFixed('highLow',n),leftRight:classifyFixed('leftRight',n),innerOuter:classifyFixed('innerOuter',n),frontBack:classifyFixed('frontBack',n),fiveElements:classifyFiveElement(year,n),fiveElementsVersion:DATA.fiveElements[String(year)]?'FIVE-'+year:null}}\nfunction enrichDraw(draw){if(!draw||!Array.isArray(draw.nums)||draw.nums.length!==7)return draw;var out={};for(var k in draw)out[k]=draw[k];out.classification=draw.nums.map(function(n){return classifyNumber(n,draw.date)});out.specialClassification=out.classification[6]||null;return out}\nfunction baseline(family,value,year){var t=family==='fiveElements'?(DATA.fiveElements[String(year)]||null):DATA.fixed[family];if(!t||!t[value])return null;return t[value].length/49}\ng.__MACAU_CLASSIFICATION__={data:DATA,classifyFixed:classifyFixed,classifyFiveElement:classifyFiveElement,classifyNumber:classifyNumber,enrichDraw:enrichDraw,baseline:baseline};\n})(globalThis);\n`;
+const appDir=path.join(__dirname,'app');fs.mkdirSync(appDir,{recursive:true});
+fs.writeFileSync(path.join(appDir,'classification-runtime.js'),out,'utf8');
+if(!out.includes('__MACAU_CLASSIFICATION__')||!out.includes('fiveElementsVersion'))throw new Error('classification runtime verification failed');
+console.log('Classification runtime built from frozen spec.');
