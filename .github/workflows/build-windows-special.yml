@@ -31,6 +31,9 @@ jobs:
       - name: Verify all classification partitions
         run: node desktop-special/verify-classification-spec.js
 
+      - name: Build shared classification runtime
+        run: node desktop-special/build-classification-runtime.js
+
       - name: Build and verify standalone special snapshot
         run: node desktop-special/build-snapshot-v2.js
 
