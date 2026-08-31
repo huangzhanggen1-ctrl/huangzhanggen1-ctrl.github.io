@@ -37,6 +37,15 @@ jobs:
       - name: Build and verify standalone special snapshot
         run: node desktop-special/build-snapshot-v2.js
 
+      - name: Inject shared classification runtime
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "desktop-special/app/classification-runtime.js")) { throw 'Classification runtime missing.' }
+          $index = Get-Content "desktop-special/app/index.html" -Raw
+          $index = $index -replace '<body>', '<body><script src="./classification-runtime.js?v=final-classification-v1"></script>'
+          Set-Content -Path "desktop-special/app/index.html" -Value $index -Encoding UTF8
+          if ((Get-Content "desktop-special/app/index.html" -Raw) -notmatch '__MACAU_CLASSIFICATION__|classification-runtime.js') { throw 'Classification runtime was not wired into index.' }
+
       - name: Prepare persistent latest shell
         shell: pwsh
         run: |
