@@ -53,6 +53,26 @@ hr('renderMaSettings();renderCustomGroups()', 'renderMaSettings();renderCustomGr
 hr('qs("#smp-window-select").addEventListener("change",function(event){', 'qsa("[data-smp-chart-zoom]").forEach(function(button){button.addEventListener("click",function(){setChartZoom(button.getAttribute("data-smp-chart-zoom"))})});var zoomScroll=qs("#smp-chart-scroll");if(zoomScroll)zoomScroll.addEventListener("wheel",function(event){if(!event.ctrlKey)return;event.preventDefault();setChartZoom(event.deltaY<0?"in":"out")},{passive:false});qs("#smp-window-select").addEventListener("change",function(event){', 'bind chart zoom');
 hr('function init(){loadCustomGroups();', 'function init(){try{var savedChartZoom=Number(localStorage.getItem("macau-special-chart-zoom"));if([4,6,8,10,12,16,20].indexOf(savedChartZoom)>=0)state.chartZoom=savedChartZoom}catch(error){}loadCustomGroups();', 'load chart zoom');
 
+// Visual-only lower BOLL pane: keep BBW/%B calculations in the engine, but render candles + UPPER/MID/LOWER like a professional BOLL chart.
+const bandStart = '      }else if(indicator==="band"){';
+const bandEnd = '      }else{\n        var lowerBase=';
+const bandStartIndex = html.indexOf(bandStart);
+const bandEndIndex = html.indexOf(bandEnd, bandStartIndex + bandStart.length);
+if (bandStartIndex < 0 || bandEndIndex < 0) throw new Error('Lower BOLL visual patch anchors not found');
+const bandRender = `      }else if(indicator==="band"){
+        var bollValues=[],bandActual=series.filter(function(row){return !row.simulated});
+        data.boll.forEach(function(row,index){if(!row)return;bollValues.push(row.upper,row.mid,row.lower);if(series[index])bollValues.push(series[index].open,series[index].close)});
+        bollValues=bollValues.filter(Number.isFinite);
+        var bandLow=Math.min.apply(null,bollValues),bandHigh=Math.max.apply(null,bollValues),bandPad=Math.max(.35,(bandHigh-bandLow)*.08),mapBand=function(value){return panelTop+(bandHigh+bandPad-value)/(bandHigh-bandLow+bandPad*2||1)*lowerHeight};
+        ctx.save();ctx.beginPath();ctx.rect(left,panelTop,cssWidth-left-right,lowerHeight);ctx.clip();
+        [0,.5,1].forEach(function(level){var gy=panelTop+lowerHeight*level;ctx.strokeStyle="#253a5488";ctx.lineWidth=1;ctx.setLineDash(level===.5?[]:[3,4]);ctx.beginPath();ctx.moveTo(left,gy);ctx.lineTo(cssWidth-right,gy);ctx.stroke()});ctx.setLineDash([]);
+        series.forEach(function(row,index){var x=xFor(index),color=row.hit?"#ef5350":"#18a66a",open=mapBand(row.open),close=mapBand(row.close),barWidth=Math.max(2,step*.56),barTop=Math.min(open,close),barHeight=Math.max(1,Math.abs(close-open));ctx.fillStyle=row.simulated?color+"a6":color;ctx.fillRect(x-barWidth/2,barTop,barWidth,barHeight)});
+        line(ctx,data.boll,mapBand,xFor,"#ef5350",1.35,"upper");line(ctx,data.boll,mapBand,xFor,"#38bdf8",1.5,"mid");line(ctx,data.boll,mapBand,xFor,"#22c55e",1.35,"lower");ctx.restore();
+        var lastBoll=data.boll.length?data.boll[data.boll.length-1]:null,fmtBand=function(value){return Number.isFinite(value)?(value>=0?"+":"")+value.toFixed(2):"—"};
+        ctx.textAlign="left";ctx.font="10px system-ui";ctx.fillStyle="#d7e5f4";ctx.fillText("BOLL(20,2)",left,panelTop+10);if(lastBoll){ctx.fillStyle="#38bdf8";ctx.fillText("MID:"+fmtBand(lastBoll.mid),left+76,panelTop+10);ctx.fillStyle="#ef5350";ctx.fillText("UPPER:"+fmtBand(lastBoll.upper),left+155,panelTop+10);ctx.fillStyle="#22c55e";ctx.fillText("LOWER:"+fmtBand(lastBoll.lower),left+255,panelTop+10)}
+`;
+html = html.slice(0, bandStartIndex) + bandRender + html.slice(bandEndIndex);
+
 // Add the multi-profile management layer only to the standalone desktop build.
 if (!html.includes('id="smp-custom-groups"')) throw new Error('Custom group editor missing before profile injection');
 if (!html.includes('data-smp-custom-action="save"')) throw new Error('Legacy save control missing before profile injection');
@@ -71,7 +91,11 @@ const verifyJs = fs.readFileSync(path.join(appDir, 'custom-profiles.js'), 'utf8'
   'data-smp-chart-zoom="in"',
   'macau-special-chart-zoom',
   'longWindow=false',
-  'series.length*barStep+88'
+  'series.length*barStep+88',
+  'BOLL(20,2)',
+  'UPPER:',
+  'MID:',
+  'LOWER:'
 ].forEach(token => { if (!verifyHtml.includes(token)) throw new Error('Desktop profile/chart snapshot verification failed: ' + token); });
 [
   'macau-special-custom-zodiac-profiles-v1',
@@ -83,4 +107,4 @@ const verifyJs = fs.readFileSync(path.join(appDir, 'custom-profiles.js'), 'utf8'
   '保存方案',
   '当前方案：'
 ].forEach(token => { if (!verifyJs.includes(token)) throw new Error('Profile manager verification failed: ' + token); });
-console.log('Standalone special-column snapshot + named profiles + real long-window K-line zoom built and verified.');
+console.log('Standalone special-column snapshot + named profiles + real long-window K-line zoom + visual BOLL pane built and verified.');
