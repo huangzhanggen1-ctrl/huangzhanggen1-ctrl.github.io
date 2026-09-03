@@ -6,10 +6,10 @@ const status=document.getElementById('status');
 function fail(msg){status.className='bad';status.textContent='载入失败：'+msg;throw new Error(msg)}
 if(!('DecompressionStream' in window))fail('当前Safari不支持DecompressionStream，请升级iOS');
 const files=[
-'./v704-attrfix1-special-gz-01.txt?v=1','./v704-attrfix1-special-gz-02.txt?v=1','./v704-attrfix1-special-gz-03.txt?v=1','./v704-attrfix1-special-gz-04.txt?v=1',
+'./v704-attrfix1-special-gz-head-01.txt?v=2','./v704-attrfix1-special-gz-head-02.txt?v=2','./v704-attrfix1-special-gz-head-03.txt?v=2','./v704-attrfix1-special-gz-head-04.txt?v=2','./v704-attrfix1-special-gz-02.txt?v=1','./v704-attrfix1-special-gz-03.txt?v=1','./v704-attrfix1-special-gz-04.txt?v=1',
 './v704-attrfix1-special-gz-tail-01.txt?v=1','./v704-attrfix1-special-gz-tail-02.txt?v=1','./v704-attrfix1-special-gz-tail-03.txt?v=1','./v704-attrfix1-special-gz-tail-04.txt?v=1','./v704-attrfix1-special-gz-tail-05.txt?v=1','./v704-attrfix1-special-gz-tail-06.txt?v=1','./v704-attrfix1-special-gz-tail-07.txt?v=1'];
 async function getText(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)fail(url+' HTTP '+r.status);return r.text()}
-const parts=await Promise.all([getText('./?mobile-base=attrfix1-rc1-'+Date.now())].concat(files.map(getText)));
+const parts=await Promise.all([getText('./?mobile-base=attrfix1-rc2-'+Date.now())].concat(files.map(getText)));
 const base=parts.shift(),b64=parts.join('').replace(/\s+/g,'');
 let bytes;try{bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0))}catch(e){fail('属性压缩块Base64损坏')}
 let special;try{const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));special=await new Response(stream).text()}catch(e){fail('属性压缩块解压失败')}
@@ -24,7 +24,7 @@ const START='<!-- MACAU_SPECIAL_BINARY_PANEL_V4_START -->',END='<!-- MACAU_SPECI
 const a=base.indexOf(START),b=base.indexOf(END,a+START.length);
 if(a<0||b<a)fail('主页面特码区边界不存在');
 const merged=base.slice(0,a)+special+base.slice(b+END.length);
-['web-runtime-adapter.js','attrfix3-web-runtime.js'].forEach(m=>{if(!merged.includes(m)&&m==='web-runtime-adapter.js')fail('主页面缺少 '+m)});
+if(!merged.includes('web-runtime-adapter.js'))fail('主页面缺少 web-runtime-adapter.js');
 status.textContent='校验通过，正在进入…';
 document.open();document.write(merged);document.close();
 })().catch(function(e){console.error('V7.0.4 mobile candidate loader',e)});
