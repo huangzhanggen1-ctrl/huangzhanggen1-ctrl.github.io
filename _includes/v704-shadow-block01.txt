@@ -1,0 +1,65 @@
+  // V7.0.4 EXPERT SHADOW S2 BEGIN — research-only, never replaces V7.0.3 expert output.
+  var SHADOW_S2_RULES={
+    group:[
+      {id:"GROUP_B_MA_BULL_NO_CROSS",tier:"CORE",dir:-1,label:"家禽MA多头但无本期交叉 → 野兽侧候选",conditions:{aScore:"1",cross:"none"}},
+      {id:"GROUP_B_LOW_PB_LOW_J",tier:"WATCH",dir:-1,label:"家禽残差低位且J低位 → 野兽侧候选",conditions:{pScore:"-1",jZone:"低位"}}
+    ],
+    size:[
+      {id:"SIZE_A_MA_NEUTRAL_MID_ACCEL_UP",tier:"CORE",dir:1,label:"MA未成排列＋BOLL中轨加速上行 → 大侧候选",conditions:{aScore:"0",midAccel:"1"}},
+      {id:"SIZE_A_MACD_POS_MID_ACCEL_UP",tier:"WATCH",dir:1,label:"MACD正柱＋BOLL中轨加速上行 → 大侧候选",conditions:{lScore:"1",midAccel:"1"}},
+      {id:"SIZE_A_PB_HIGH_MACD_POS",tier:"WATCH",dir:1,label:"%B偏上＋MACD正柱 → 大侧候选",conditions:{pScore:"1",lScore:"1"}}
+    ],
+    parity:[
+      {id:"PARITY_A_MA_NEUTRAL_CROSS",tier:"WATCH",dir:1,label:"MA未成排列＋本期技术交叉 → 单侧预启动候选",conditions:{aScore:"0",cross:"cross"}},
+      {id:"PARITY_A_CONTRACT_KDJ_DOWN",tier:"WATCH",dir:1,label:"BOLL收缩＋KDJ斜率向下 → 单侧反向候选",conditions:{widthState:"收缩",kdjSlope:"-1"}}
+    ],
+    tailSize:[
+      {id:"TAIL_B_MACD_ACCEL_UP_J_NEUTRAL",tier:"CORE",dir:-1,label:"MACD柱加速＋J中性 → 小尾侧候选",conditions:{iScore:"1",jZone:"中性"}},
+      {id:"TAIL_B_KDJ_UP_J_NEUTRAL",tier:"WATCH",dir:-1,label:"KDJ斜率向上＋J中性 → 小尾侧候选",conditions:{kdjSlope:"1",jZone:"中性"}},
+      {id:"TAIL_B_TR_NEG_CONTRACT",tier:"WATCH",dir:-1,label:"趋势票-1＋BOLL收缩 → 小尾侧候选",conditions:{tr:"-1",widthState:"收缩"}}
+    ],
+    yinYang:[
+      {id:"YINYANG_B_MACD_ACCEL_NEUTRAL",tier:"CORE",dir:-1,label:"MACD柱加速度中性 → 阳肖侧候选",conditions:{iScore:"0"}},
+      {id:"YINYANG_B_STABLE_ZERO_BELOW",tier:"WATCH",dir:-1,label:"带宽平稳＋DIF/DEA零轴下方 → 阳肖侧候选",conditions:{widthState:"平稳",zeroState:"零轴下方"}}
+    ],
+    digitParity:[
+      {id:"DIGIT_A_PB_NEUTRAL_ZERO_ABOVE",tier:"CORE",dir:1,label:"%B中性＋DIF/DEA零轴上方 → 合单候选",conditions:{pScore:"0",zeroState:"零轴上方"}},
+      {id:"DIGIT_A_SLOPE_UP_ACCEL_DOWN",tier:"WATCH",dir:1,label:"中轨仍上行但加速度转弱 → 合单候选",conditions:{sScore:"1",midAccel:"-1"}}
+    ],
+    blackWhite:[
+      {id:"BW_A_TR1_MIDSLOPE_UP",tier:"CORE",dir:1,label:"趋势票+1＋中轨上行 → 白肖预启动",conditions:{tr:"1",midSlope:"1"}},
+      {id:"BW_B_MA_NEUTRAL_TR0",tier:"WATCH",dir:-1,label:"MA未成排列＋趋势票0 → 黑肖侧候选",conditions:{aScore:"0",tr:"0"}}
+    ],
+    fortune:[
+      {id:"FORTUNE_A_MA_BEAR_NO_DIV",tier:"CORE",dir:1,label:"MA空头排列但无背离 → 吉肖反向候选",conditions:{maState:"空头排列",div:"none"}}
+    ]
+  };
+  var SHADOW_LEGACY_RULES={
+    group:{allow:[],veto:[{id:"GROUP_LEGACY_VETO_EXPAND_FLATACCEL",tier:"CORE",label:"带宽扩张但中轨加速度中性",conditions:{widthState:"扩张",midAccel:"0"}}]},
+    size:{allow:[{id:"SIZE_LEGACY_ALLOW_MIDACCEL_DOWN_NODIV",tier:"CORE",label:"旧方向＋中轨加速度回落且无背离",conditions:{midAccel:"-1",div:"none"}}],veto:[{id:"SIZE_LEGACY_VETO_UPPER_BULL",tier:"CORE",label:"上轨区＋MA多头的末端风险",conditions:{aScore:"1",zone:"上轨区"}}]},
+    parity:{allow:[],veto:[{id:"PARITY_LEGACY_VETO_UPPER_KDJ_DOWN",tier:"CORE",label:"中轨上方但KDJ转弱",conditions:{zone:"中轨上方",kdjSlope:"-1"}}]},
+    tailSize:{allow:[{id:"TAIL_LEGACY_ALLOW_MIDSLOPE_ACCEL_UP",tier:"CORE",label:"旧方向＋中轨上行且继续加速",conditions:{sScore:"1",midAccel:"1"}}],veto:[]},
+    yinYang:{allow:[{id:"YINYANG_LEGACY_ALLOW_ZERO_ABOVE_J_NEUTRAL",tier:"CORE",label:"旧方向＋DIF/DEA零轴上方＋J中性",conditions:{zeroState:"零轴上方",jZone:"中性"}}],veto:[{id:"YINYANG_LEGACY_VETO_UPPER_ZERO_ABOVE",tier:"CORE",label:"上轨区＋DIF/DEA零轴上方末端风险",conditions:{zone:"上轨区",zeroState:"零轴上方"}}]},
+    digitParity:{allow:[],veto:[{id:"DIGIT_LEGACY_VETO_UPPER_MIDSLOPE",tier:"CORE",label:"中轨上方＋中轨继续上行的反向风险",conditions:{sScore:"1",zone:"中轨上方"}}]},
+    blackWhite:{allow:[{id:"BW_LEGACY_ALLOW_FLARE_HISTMAG_UP",tier:"WATCH",label:"喇叭口双轨外扩＋MACD柱幅增强",conditions:{bollState:"喇叭口 · 双轨外扩",histMag:"1"}}],veto:[{id:"BW_LEGACY_VETO_PB_HIGH_MIDUP",tier:"CORE",label:"%B偏上＋中轨上方的历史弱区",conditions:{pScore:"1",zone:"中轨上方"}}]},
+    fortune:{allow:[{id:"FORTUNE_LEGACY_ALLOW_KDJ_NEUTRAL_HISTFADE",tier:"CORE",label:"KDJ关系中性＋MACD柱幅回落",conditions:{kdjRel:"0",histMag:"-1"}}],veto:[{id:"FORTUNE_LEGACY_VETO_SHIFTUP_EXPAND",tier:"CORE",label:"%B偏上＋通道上移带宽扩张",conditions:{pScore:"1",bollState:"通道上移 · 带宽扩张"}}]}
+  };
+  function shadowLegacyRuleMatch(rule,snapshot){if(!snapshot||!snapshot.base||snapshot.base.direction===0)return false;return Object.keys(rule.conditions).every(function(key){return String(snapshot.feature[key])===String(rule.conditions[key])})}
+  function shadowLegacyEvidence(prior,polarity){
+    var n=prior.length;if(!n)return {n:0,hits:0,accuracy:null,expected:null,shrunk:null,lift:null,recentN:0,recentAccuracy:null,recentExpected:null,active:false,reason:"样本不足"};
+    var hits=prior.filter(function(row){return row.hit}).length,expected=shadowS2Mean(prior.map(function(row){return row.expected})),accuracy=hits/n,tau=18,shrunk=(hits+tau*expected)/(n+tau),lift=shrunk-expected,recent=prior.slice(-20),recentHits=recent.filter(function(row){return row.hit}).length,recentAccuracy=recent.length?recentHits/recent.length:null,recentExpected=recent.length?shadowS2Mean(recent.map(function(row){return row.expected})):null,positive=polarity==="allow",active=n>=20&&(positive?lift>=.035:lift<=-.035)&&(recent.length<10||(positive?recentAccuracy>=recentExpected-.01:recentAccuracy<=recentExpected+.01)),reason=n<20?"样本不足":positive?(lift<.035?"状态正增量不足":recent.length>=10&&recentAccuracy<recentExpected-.01?"近20状态转弱":"Legacy状态证据通过"):(lift>-.035?"负增量不足以禁手":recent.length>=10&&recentAccuracy>recentExpected+.01?"近20已恢复":"Legacy禁手证据通过");
+    return {n:n,hits:hits,accuracy:accuracy,expected:expected,shrunk:shrunk,lift:lift,recentN:recent.length,recentAccuracy:recentAccuracy,recentExpected:recentExpected,active:active,reason:reason}
+  }
+  function shadowLegacyGateEvaluate(rows,mode){
+    var cfg=SHADOW_LEGACY_RULES[mode]||{allow:[],veto:[]},canonical=MODE[mode]&&MODE[mode].values&&MODE[mode].values[0];if(!canonical)return {supported:false,records:[],summary:{signals:0,hits:0,accuracy:0,expected:0,lift:0}};
+    var series=buildSeriesForRows(rows,mode,canonical),closes=series.map(function(row){return row.close}),boll=bollinger(closes),mac=macd(closes),kdjRows=kdj(series),allowLedgers=cfg.allow.map(function(){return []}),vetoLedgers=cfg.veto.map(function(){return []}),records=[],active=null,current=null;
+    for(var index=59;index<series.length;index+=1){
+      var snap=shadowS2Snapshot(series,boll,mac,kdjRows,index);if(!snap)continue;var legacyDir=snap.base.direction,event={index:index,label:rows[index].label,nextLabel:index<rows.length-1?rows[index+1].label:deriveNextMeta(rows[index]).label,stage:legacyDir===0?"NO_LEGACY":"LEGACY_UNPROVEN",direction:0,candidateDirection:legacyDir,side:legacyDir?shadowS2AbsoluteLabel(mode,legacyDir):null,source:"LEGACY_STATE",reason:legacyDir===0?"旧专家本期无方向":"旧方向尚未通过分类状态证据门",technical:{legacyDirection:legacyDir,zone:snap.base.zone,widthState:snap.base.widthState,maState:snap.base.maState,tr:snap.base.tr,iScore:snap.base.iScore}};
+      if(legacyDir!==0){
+        var vetoMatches=cfg.veto.map(function(rule,ruleIndex){return shadowLegacyRuleMatch(rule,snap)?{rule:rule,ruleIndex:ruleIndex,evidence:shadowLegacyEvidence(vetoLedgers[ruleIndex],"veto")}:null}).filter(Boolean),allowMatches=cfg.allow.map(function(rule,ruleIndex){return shadowLegacyRuleMatch(rule,snap)?{rule:rule,ruleIndex:ruleIndex,evidence:shadowLegacyEvidence(allowLedgers[ruleIndex],"allow")}:null}).filter(Boolean),veto=vetoMatches.filter(function(item){return item.rule.tier==="CORE"&&item.evidence.active}).sort(function(a,b){return (a.evidence.lift||0)-(b.evidence.lift||0)})[0],confirmed=allowMatches.filter(function(item){return item.rule.tier==="CORE"&&item.evidence.active}).sort(function(a,b){return (b.evidence.lift||0)-(a.evidence.lift||0)})[0];
+        if(veto){event.stage="VETO";event.ruleId=veto.rule.id;event.ruleTier=veto.rule.tier;event.ruleLabel=veto.rule.label;event.evidence=veto.evidence;event.reason=veto.evidence.reason;active=null}
+        else if(confirmed){event.stage=active&&active.dir===legacyDir&&index-active.index<=3?"LEGACY_CONTINUATION":"LEGACY_CONFIRMED";event.direction=legacyDir;event.ruleId=confirmed.rule.id;event.ruleTier=confirmed.rule.tier;event.ruleLabel=confirmed.rule.label;event.evidence=confirmed.evidence;event.reason=confirmed.evidence.reason;active={dir:legacyDir,index:index}}
+        else if(allowMatches.length){allowMatches.sort(function(a,b){return (a.rule.tier==="CORE"?-1:1)-(b.rule.tier==="CORE"?-1:1)||b.evidence.n-a.evidence.n});var pre=allowMatches[0];event.stage="LEGACY_PRESTART";event.ruleId=pre.rule.id;event.ruleTier=pre.rule.tier;event.ruleLabel=pre.rule.label;event.evidence=pre.evidence;event.reason=pre.rule.tier==="WATCH"?"WATCH Legacy候选仅观察 · 等待独立前推升级":pre.evidence.reason}
+        else if(vetoMatches.length){vetoMatches.sort(function(a,b){return b.evidence.n-a.evidence.n});var vp=vetoMatches[0];event.stage="LEGACY_RISK";event.ruleId=vp.rule.id;event.ruleTier=vp.rule.tier;event.ruleLabel=vp.rule.label;event.evidence=vp.evidence;event.reason=vp.evidence.reason}
+      }
+      if(index<rows.length-1){var nex
