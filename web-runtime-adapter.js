@@ -1,3 +1,4 @@
+document.write('<script src="./attrfix3-web-runtime.js?v=20260904-attrfix3-rc1"><\/script>');
 (function(){'use strict';
 if(globalThis.__XINMACAU_WEB_ADAPTER__)return;
 globalThis.__XINMACAU_WEB_ADAPTER__={version:'V7.0.4-S4-WEB-RC1',storage:'browser-local'};
@@ -28,6 +29,5 @@ async function bodyJson(input,init){let b=init&&init.body;if(b==null&&typeof Req
 async function virtualFetch(input,init={}){const raw=typeof input==='string'?input:(input&&input.url)||'',u=new URL(raw,location.href),path=u.pathname,method=String(init.method||(input&&input.method)||'GET').toUpperCase();let kind=null,action=null;if(path.startsWith('/__s3/')){kind='s3';action=path.slice('/__s3/'.length)}else if(path.startsWith('/__s4/')){kind='s4';action=path.slice('/__s4/'.length)}else return nativeFetch(input,init);
  return serial(async()=>{try{if(action==='ledger'&&method==='GET')return jsonResponse(await state(kind));if(action==='freeze'&&method==='POST')return jsonResponse({status:'PASS',record:await freeze(kind,await bodyJson(input,init))},201);if(action==='settle'&&method==='POST')return jsonResponse({status:'PASS',record:await settle(kind,await bodyJson(input,init))},201);return jsonResponse({status:'FAIL',error:'unsupported web ledger route'},404)}catch(e){return jsonResponse({status:'FAIL',error:e&&e.message||'web ledger error'},String(e&&e.code||'').includes('REJECT')?409:400)}})}
 globalThis.fetch=virtualFetch;
-// Expose read-only diagnostics and backup helpers.
 globalThis.XinMacauWeb={version:'V7.0.4-S4-WEB-RC1',async s3(){return state('s3')},async s4(){return state('s4')},exportBackup(){const keys=['macau_user_draws_v1',S3KEY,S4KEY,'macau-special-period-days','macau-special-chart-zoom','macau-special-overlay','macau-special-ma-periods','macau-special-expert-hints'];const data={schema:'xinmacau-web-backup-v1',exportedAt:new Date().toISOString(),values:{}};keys.forEach(k=>data.values[k]=localStorage.getItem(k));return data}};
 })();
