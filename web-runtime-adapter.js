@@ -1,4 +1,4 @@
-document.write('<script src="./attrfix3-web-runtime.js?v=20260904-attrfix3-rc1"><\/script>');
+document.write('<script src="./attrfix3-web-runtime.js?v=20260904-attrfix3-rc2"><\/script>');
 (function(){'use strict';
 if(globalThis.__XINMACAU_WEB_ADAPTER__)return;
 globalThis.__XINMACAU_WEB_ADAPTER__={version:'V7.0.4-S4-WEB-RC1',storage:'browser-local'};
