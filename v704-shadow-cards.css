@@ -1,0 +1,38 @@
+#macau-special-panel .smp-shadow-s2-card{display:grid;grid-template-columns:minmax(210px,.72fr) minmax(280px,1.35fr) minmax(220px,.9fr);align-items:stretch;gap:9px;margin:0 0 8px;padding:10px;border:1px dashed #34516f;border-top:2px solid #607d9b;border-radius:12px;background:linear-gradient(135deg,#081522,#0b1c2c)}
+#macau-special-panel .smp-shadow-s2-card>div{min-width:0;padding:9px 10px;border:1px solid #203852;border-radius:9px;background:#071420}
+#macau-special-panel .smp-shadow-s2-card span,#macau-special-panel .smp-shadow-s2-card small{display:block;color:#8299b3;font-size:9px;line-height:1.45}
+#macau-special-panel .smp-shadow-s2-card strong{display:block;margin:5px 0;color:#b9c9da;font-size:17px;line-height:1.3}
+#macau-special-panel .smp-shadow-s2-card b{display:block;color:#dce8f6;font-size:11px;line-height:1.4}
+#macau-special-panel .smp-shadow-s2-card p{margin:5px 0 0;color:#9db1c8;font-size:10px;line-height:1.55}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-confirm{border-top-color:#4ade80}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-confirm strong{color:#86efac}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-continue{border-top-color:#22d3ee}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-continue strong{color:#67e8f9}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-pre{border-top-color:#facc15}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-pre strong{color:#fde047}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-veto{border-top-color:#fb7185}
+#macau-special-panel .smp-shadow-s2-card.smp-shadow-veto strong{color:#fda4af}
+#macau-special-panel .smp-shadow-s2-card.smp-off{display:none}
+#macau-special-panel .smp-shadow-s3-card{display:grid;grid-template-columns:minmax(210px,.72fr) minmax(280px,1.35fr) minmax(220px,.9fr);align-items:stretch;gap:9px;margin:0 0 8px;padding:10px;border:1px solid #456178;border-top:3px solid #8b5cf6;border-radius:12px;background:linear-gradient(135deg,#0c1325,#111a31)}
+#macau-special-panel .smp-shadow-s3-card>div{min-width:0;padding:9px 10px;border:1px solid #263b58;border-radius:9px;background:#091526}
+#macau-special-panel .smp-shadow-s3-card span,#macau-special-panel .smp-shadow-s3-card small{display:block;color:#8fa3bd;font-size:9px;line-height:1.45}
+#macau-special-panel .smp-shadow-s3-card strong{display:block;margin:5px 0;color:#d5c9ff;font-size:17px;line-height:1.3}
+#macau-special-panel .smp-shadow-s3-card b{display:block;color:#e5edfa;font-size:11px;line-height:1.4}
+#macau-special-panel .smp-shadow-s3-card p{margin:5px 0 0;color:#aab9cf;font-size:10px;line-height:1.55}
+#macau-special-panel .smp-shadow-s3-card.smp-shadow-confirm{border-top-color:#4ade80}
+#macau-special-panel .smp-shadow-s3-card.smp-shadow-pre{border-top-color:#a78bfa}
+#macau-special-panel .smp-shadow-s3-card.smp-shadow-veto{border-top-color:#fb7185}
+#macau-special-panel .smp-shadow-s3-card.smp-off{display:none}
+#macau-special-panel .smp-shadow-s4-card{display:grid;grid-template-columns:minmax(210px,.72fr) minmax(300px,1.4fr) minmax(230px,.95fr);align-items:stretch;gap:9px;margin:0 0 8px;padding:10px;border:1px solid #365d70;border-top:3px solid #22d3ee;border-radius:12px;background:linear-gradient(135deg,#071b28,#0a2430)}
+#macau-special-panel .smp-shadow-s4-card>div{min-width:0;padding:9px 10px;border:1px solid #234859;border-radius:9px;background:#071925}
+#macau-special-panel .smp-shadow-s4-card span,#macau-special-panel .smp-shadow-s4-card small{display:block;color:#8fb5c4;font-size:9px;line-height:1.45}
+#macau-special-panel .smp-shadow-s4-card strong{display:block;margin:5px 0;color:#bff5ff;font-size:17px;line-height:1.3}
+#macau-special-panel .smp-shadow-s4-card b{display:block;color:#e3f7fb;font-size:11px;line-height:1.4}
+#macau-special-panel .smp-shadow-s4-card p{margin:5px 0 0;color:#a7c8d2;font-size:10px;line-height:1.55}
+#macau-special-panel .smp-shadow-s4-card.smp-s4-confirm{border-top-color:#4ade80}
+#macau-special-panel .smp-shadow-s4-card.smp-s4-provisional{border-top-color:#facc15}
+#macau-special-panel .smp-shadow-s4-card.smp-s4-watch{border-top-color:#22d3ee}
+#macau-special-panel .smp-shadow-s4-card.smp-s4-abstain{border-top-color:#64748b}
+#macau-special-panel .smp-shadow-s4-card.smp-s4-error{border-top-color:#fb7185}
+#macau-special-panel .smp-shadow-s4-card.smp-off{display:none}
+@media(max-width:760px){#macau-special-panel .smp-shadow-s2-card,#macau-special-panel .smp-shadow-s3-card,#macau-special-panel .smp-shadow-s4-card{grid-template-columns:1fr;padding:8px}}
