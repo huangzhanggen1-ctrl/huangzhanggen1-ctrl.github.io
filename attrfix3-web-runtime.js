@@ -1,3 +1,4 @@
+document.write('<script src="./v7-attribute-frozen-specs.js?v=20260904-attrfix3"><\/script><script src="./attribute-kline-bridge.js?v=20260904-attrfix3"><\/script><script src="./attrfix3-attribute-panel.js?v=20260904-attrfix3"><\/script>');
 (function(){
 'use strict';
 var VERSION='ATTRFIX3-WEB-RC1';
