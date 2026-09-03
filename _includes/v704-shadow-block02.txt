@@ -1,0 +1,54 @@
+t=rows[index+1],actual=isHit(next,mode,canonical)?1:-1;event.actual=actual;event.correct=event.direction!==0&&event.direction===actual;event.expected=event.direction>0?baseline(mode,canonical,next):event.direction<0?1-baseline(mode,canonical,next):0;cfg.allow.forEach(function(rule,ruleIndex){if(shadowLegacyRuleMatch(rule,snap)){var expected=legacyDir>0?baseline(mode,canonical,next):1-baseline(mode,canonical,next);allowLedgers[ruleIndex].push({hit:actual===legacyDir,expected:expected,label:next.label})}});cfg.veto.forEach(function(rule,ruleIndex){if(shadowLegacyRuleMatch(rule,snap)){var expected=legacyDir>0?baseline(mode,canonical,next):1-baseline(mode,canonical,next);vetoLedgers[ruleIndex].push({hit:actual===legacyDir,expected:expected,label:next.label})}})}
+      records.push(event);current=event
+    }
+    var signaled=records.filter(function(row){return row.direction!==0&&row.actual!=null}),hits=signaled.filter(function(row){return row.correct}).length,accuracy=signaled.length?hits/signaled.length:0,expected=signaled.length?shadowS2Mean(signaled.map(function(row){return row.expected})):0;
+    return {supported:true,mode:mode,canonical:canonical,records:records,current:current,summary:{signals:signaled.length,hits:hits,accuracy:accuracy,expected:expected,lift:accuracy-expected,coverage:records.length?signaled.length/records.length:0},rules:cfg}
+  }
+  function shadowS2Sign(value,threshold){return value>=threshold?1:value<=-threshold?-1:0}
+  function shadowS2Snapshot(series,boll,mac,kdjRows,index){
+    var base=technicalAt(series,boll,mac,index);if(!base)return null;
+    var current=kdjRows[index],previous=kdjRows[index-1]||current;
+    var feature={
+      pScore:String(base.pScore),aScore:String(base.aScore),sScore:String(base.sScore),tr:String(base.tr),lScore:String(base.lScore),iScore:String(base.iScore),
+      widthState:base.widthState,bollState:base.bollState,zone:base.zone,maState:base.maState,zeroState:base.zeroState,
+      kdjRel:String(shadowS2Sign(current.k-current.d,2)),kdjSlope:String(shadowS2Sign(current.k-previous.k,2)),jZone:current.j>=80?"高位":current.j<=20?"低位":"中性",
+      midAccel:String(shadowS2Sign(base.midSlope-base.previousMidSlope,.01)),histMag:String(shadowS2Sign(base.histMagnitudeDelta,.01)),midSlope:String(shadowS2Sign(base.midSlope,.02)),
+      cross:(base.maGold||base.maDead||base.macdGold||base.macdDead)?"cross":"none",div:base.topDivergence?"top":base.bottomDivergence?"bottom":"none"
+    };
+    return {base:base,feature:feature,kdj:{k:current.k,d:current.d,j:current.j}}
+  }
+  function shadowS2Match(rule,snapshot){if(!snapshot||!snapshot.base||snapshot.base.direction!==0)return false;return Object.keys(rule.conditions).every(function(key){return String(snapshot.feature[key])===String(rule.conditions[key])})}
+  function shadowS2Mean(values){return values.length?values.reduce(function(sum,value){return sum+value},0)/values.length:0}
+  function shadowS2Evidence(prior){
+    var n=prior.length;if(!n)return {n:0,hits:0,accuracy:null,expected:null,shrunk:null,lift:null,recentN:0,recentAccuracy:null,recentExpected:null,allow:false,reason:"样本不足"};
+    var hits=prior.filter(function(row){return row.hit}).length,expected=shadowS2Mean(prior.map(function(row){return row.expected})),accuracy=hits/n,tau=18,shrunk=(hits+tau*expected)/(n+tau),lift=shrunk-expected,recent=prior.slice(-20),recentHits=recent.filter(function(row){return row.hit}).length,recentAccuracy=recent.length?recentHits/recent.length:null,recentExpected=recent.length?shadowS2Mean(recent.map(function(row){return row.expected})):null,allow=n>=20&&lift>=.035&&(recent.length<10||recentAccuracy>=recentExpected-.01),reason=n<20?"样本不足":lift<.035?"收缩后增量不足":recent.length>=10&&recentAccuracy<recentExpected-.01?"近20同类状态转弱":"状态证据通过";
+    return {n:n,hits:hits,accuracy:accuracy,expected:expected,shrunk:shrunk,lift:lift,recentN:recent.length,recentAccuracy:recentAccuracy,recentExpected:recentExpected,allow:allow,reason:reason}
+  }
+  function shadowS2AbsoluteLabel(mode,direction){var cfg=MODE[mode];if(!cfg||!Array.isArray(cfg.values)||cfg.values.length!==2)return direction>0?"A侧":"B侧";return direction>0?cfg.values[0]:cfg.values[1]}
+  function shadowS2Evaluate(rows,mode){
+    var rules=SHADOW_S2_RULES[mode]||[],canonical=MODE[mode]&&MODE[mode].values&&MODE[mode].values[0];
+    if(!rules.length||!canonical)return {supported:false,mode:mode,records:[],current:null,summary:{signals:0,hits:0,accuracy:0,expected:0,lift:0},rules:rules};
+    var series=buildSeriesForRows(rows,mode,canonical),closes=series.map(function(row){return row.close}),boll=bollinger(closes),mac=macd(closes),kdjRows=kdj(series),ledgers=rules.map(function(){return []}),records=[],active=null,current=null;
+    for(var index=59;index<series.length;index+=1){
+      var snap=shadowS2Snapshot(series,boll,mac,kdjRows,index);if(!snap)continue;
+      var matches=[];
+      rules.forEach(function(rule,ruleIndex){if(shadowS2Match(rule,snap))matches.push({rule:rule,ruleIndex:ruleIndex,evidence:shadowS2Evidence(ledgers[ruleIndex])})});
+      var confirmed=matches.filter(function(item){return item.rule.tier==="CORE"&&item.evidence.allow}),selected=null,stage="WAIT",reason="当前没有S2冻结状态候选";
+      if(confirmed.length){
+        var dirs=confirmed.map(function(item){return item.rule.dir}).filter(function(value,pos,array){return array.indexOf(value)===pos});
+        if(dirs.length>1){stage="CONFLICT";reason="多个已确认状态方向冲突，禁手"}
+        else{confirmed.sort(function(a,b){return (b.evidence.lift||0)-(a.evidence.lift||0)||b.evidence.n-a.evidence.n});selected=confirmed[0];stage=active&&active.dir===selected.rule.dir&&index-active.index<=3?"CONTINUATION":"CONFIRMED";reason=selected.evidence.reason;active={dir:selected.rule.dir,index:index}}
+      }else if(matches.length){matches.sort(function(a,b){return (a.rule.tier==="CORE"?-1:1)-(b.rule.tier==="CORE"?-1:1)||b.evidence.n-a.evidence.n||(b.evidence.lift||-9)-(a.evidence.lift||-9)});selected=matches[0];stage="PRESTART";reason=selected.rule.tier==="WATCH"?"WATCH候选仅观察 · 等待独立前推升级":selected.evidence.reason}
+      else if(active&&index-active.index>3)active=null;
+      var event={index:index,label:rows[index].label,nextLabel:index<rows.length-1?rows[index+1].label:deriveNextMeta(rows[index]).label,stage:stage,direction:selected&&(stage==="CONFIRMED"||stage==="CONTINUATION")?selected.rule.dir:0,candidateDirection:selected?selected.rule.dir:0,side:selected?shadowS2AbsoluteLabel(mode,selected.rule.dir):null,ruleId:selected?selected.rule.id:null,ruleTier:selected?selected.rule.tier:null,ruleLabel:selected?selected.rule.label:null,reason:reason,evidence:selected?selected.evidence:null,kdj:snap.kdj,technical:{legacyDirection:snap.base.direction,tr:snap.base.tr,iScore:snap.base.iScore,lScore:snap.base.lScore,zone:snap.base.zone,widthState:snap.base.widthState,maState:snap.base.maState,midSlope:snap.base.midSlope,midAccel:snap.base.midSlope-snap.base.previousMidSlope}};
+      if(index<rows.length-1){
+        var next=rows[index+1],actual=isHit(next,mode,canonical)?1:-1;
+        event.actual=actual;event.correct=event.direction!==0&&event.direction===actual;event.expected=event.direction>0?baseline(mode,canonical,next):event.direction<0?1-baseline(mode,canonical,next):0;
+        rules.forEach(function(rule,ruleIndex){if(shadowS2Match(rule,snap)){var expected=rule.dir>0?baseline(mode,canonical,next):1-baseline(mode,canonical,next);ledgers[ruleIndex].push({hit:actual===rule.dir,expected:expected,label:next.label})}})
+      }
+      records.push(event);current=event
+    }
+    var signaled=records.filter(function(row){return row.direction!==0&&row.actual!=null}),hits=signaled.filter(function(row){return row.correct}).length,accuracy=signaled.length?hits/signaled.length:0,expected=signaled.length?shadowS2Mean(signaled.map(function(row){return row.expected})):0;
+    return {supported:true,mode:mode,canonical:canonical,records:records,current:current,summary:{signals:signaled.length,hits:hits,accuracy:accuracy,expected:expected,lift:accuracy-expected,coverage:records.length?signaled.length/records.length:0},rules:rules}
+  }
+  function shadowS2Data(mode){var signature=specialDataSignature(mode),key=specials.length+"|"+state.cutoffIndex+"|"+mode+"|"+signature;if(shadowS2Cache.key===key&&shadowS2Cache.value)return shadowS2Cache.value;var rows=prefixRows(),missed=shadowS2Evaluate(rows,mode),legacy=shadowLegacyGateEvaluate(rows,mode);if(!missed.supported){var unsupported={supported:false,mode:mode,records:[],current:null,summary:{signals:0,hits:0,accuracy:0,expected:0,lift:0},missed:missed,legacy:legacy,rules:[]};shadowS2Cache={key:key,value:unsupported};return unsupported}var byIndex=Object.create(null);missed.records.forEach(function(event){byIndex[event.index]=event});legacy.records.forEach(function(event){if(event.technical&&event.technical.legacyDirection!==0)byIndex[event.index]=event});var records=Object.keys(byIndex).map(function(index){return byIndex[index]}).sort(function(a,b){return a.index-b.inde
