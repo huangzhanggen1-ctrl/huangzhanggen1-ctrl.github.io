@@ -18,7 +18,8 @@ permalink: /
 {% assign patched_page = patched_page | replace: 'qs("#smp-chart-title").textContent=data.value+" K线、"', 'qs("#smp-chart-title").textContent=data.value+" "+state.periodDays+"日K线、"' %}
 {% assign patched_page = patched_page | replace: '  var expertCache={key:"",value:null};', '  var expertCache={key:"",value:null};var shadowS2Cache={key:"",value:null};function specialDataSignature(mode){return ""}' %}
 {% capture shadow_engine %}{% include v704-shadow-block01.txt %}{% include v704-shadow-block02.txt %}{% include v704-shadow-block03.txt %}{% include v704-shadow-block04.txt %}{% include v704-shadow-block05.txt %}{% include v704-shadow-block06.txt %}{% include v704-shadow-block07.txt %}{% endcapture %}
-{% capture shadow_engine_anchor %}{{ shadow_engine }}  function lastExpertEvent(events,type){% endcapture %}
+{% assign open_brace = '{' %}
+{% capture shadow_engine_anchor %}{{ shadow_engine }}  function lastExpertEvent(events,type){{ open_brace }}{% endcapture %}
 {% assign patched_page = patched_page | replace: '  function lastExpertEvent(events,type){', shadow_engine_anchor %}
 {% capture shadow_cards %}{% include v704-shadow-cards.html %}{% endcapture %}
 {% capture shadow_cards_anchor %}{{ shadow_cards }}      <div class="smp-chart-canvas-wrap">{% endcapture %}
