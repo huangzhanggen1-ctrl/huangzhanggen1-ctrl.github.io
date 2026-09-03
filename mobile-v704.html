@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#071728"><title>新澳门K线 V7.0.4 手机候选</title><style>html,body{margin:0;height:100%;background:#071728;color:#eef5ff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}#status{padding:calc(28px + env(safe-area-inset-top)) 20px;line-height:1.7;color:#bfd0e2}.bad{color:#ffaaa8}</style></head><body><div id="status">正在载入 V7.0.4 手机整合候选版…</div><script>
+(async function(){
+'use strict';
+const status=document.getElementById('status');
+function fail(msg){status.className='bad';status.textContent='载入失败：'+msg;throw new Error(msg)}
+if(!('DecompressionStream' in window))fail('当前Safari不支持DecompressionStream，请升级iOS');
+const files=[
+'./v704-attrfix1-special-gz-01.txt?v=1','./v704-attrfix1-special-gz-02.txt?v=1','./v704-attrfix1-special-gz-03.txt?v=1','./v704-attrfix1-special-gz-04.txt?v=1',
+'./v704-attrfix1-special-gz-tail-01.txt?v=1','./v704-attrfix1-special-gz-tail-02.txt?v=1','./v704-attrfix1-special-gz-tail-03.txt?v=1','./v704-attrfix1-special-gz-tail-04.txt?v=1','./v704-attrfix1-special-gz-tail-05.txt?v=1','./v704-attrfix1-special-gz-tail-06.txt?v=1','./v704-attrfix1-special-gz-tail-07.txt?v=1'];
+async function getText(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)fail(url+' HTTP '+r.status);return r.text()}
+const parts=await Promise.all([getText('./?mobile-base=attrfix1-rc1-'+Date.now())].concat(files.map(getText)));
+const base=parts.shift(),b64=parts.join('').replace(/\s+/g,'');
+let bytes;try{bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0))}catch(e){fail('属性压缩块Base64损坏')}
+let special;try{const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));special=await new Response(stream).text()}catch(e){fail('属性压缩块解压失败')}
+const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(special));
+const sha=[...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('');
+if(sha!=='a1ba96aa176c057ce2f304ec8563872feebc21c550730968f775796de3ccd1dd')fail('ATTRFIX1区块SHA不一致 '+sha.slice(0,12));
+const required=['XINMACAU_V7_RC5_CANONICAL_ATTRIBUTE_PROVIDER','MacauAttributeKlineBridge','smp-attribute-number-guide','innerOuter','S3 PROSPECTIVE','S4 PRECISION70','periodKColor'];
+required.forEach(m=>{if(!special.includes(m))fail('ATTRFIX1区块缺少 '+m)});
+const canonicalInner=/"内码"\s*:\s*\{[\s\S]*?"numbers"\s*:\s*\[\s*9,\s*10,\s*11,\s*12,\s*13,\s*16,\s*17,\s*18,\s*19,\s*20,\s*23,\s*24,\s*25,\s*26,\s*27,\s*30,\s*31,\s*32,\s*33,\s*34,\s*37,\s*38,\s*39,\s*40,\s*41\s*\]/;
+if(!canonicalInner.test(special))fail('内码冻结表不一致');
+const START='<!-- MACAU_SPECIAL_BINARY_PANEL_V4_START -->',END='<!-- MACAU_SPECIAL_BINARY_PANEL_V4_END -->';
+const a=base.indexOf(START),b=base.indexOf(END,a+START.length);
+if(a<0||b<a)fail('主页面特码区边界不存在');
+const merged=base.slice(0,a)+special+base.slice(b+END.length);
+['web-runtime-adapter.js','attrfix3-web-runtime.js'].forEach(m=>{if(!merged.includes(m)&&m==='web-runtime-adapter.js')fail('主页面缺少 '+m)});
+status.textContent='校验通过，正在进入…';
+document.open();document.write(merged);document.close();
+})().catch(function(e){console.error('V7.0.4 mobile candidate loader',e)});
+</script></body></html>
