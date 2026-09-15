@@ -76,6 +76,12 @@ const memberText=await new Response(new Blob([memberBytes]).stream().pipeThrough
 const memberSha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(memberText)))].map(x=>x.toString(16).padStart(2,'0')).join('');
 if(memberSha!=="8d07e3798c6f71a96b842b43fd0378ae34793ec5b4eed32dc614a34fef36b4b9")fail('分组说明资源校验失败');
 for(const change of JSON.parse(memberText))special=patchOnce(special,change[0],change[1],change[2]);
+// Requested label cleanup and removal of the duplicate high/low navigation.
+const cleanupBytes=Uint8Array.from(atob("H4sIAAAAAAACCr1U3U4TQRR+lWGv2rCuP7dQXkBNjcarbi+mu9Pu6OzMZnYWqMYEiBBMKJioaIQoF2BjDAbUCNQqia9ip61XfQXP7rZYlADeuBeTMzPnfOeb8509hYIxodfW2qsH3bnVXnOxtb/ea67opefxWovX7tZhr/lo/GIpUkrwCcMcChg+veUJqZBLJXEUFfzCPeFS7KDUATFcIswwLxfNgqHntzv1WquxpBcX9OJniG01nv5xcjtwsSJokoa0xAhyYFMRsoocEXFlmFdinNb+dvfbAfq+h/TmW72+E1s/371ofV1Ozvbe6JWPibUwrzdXE+tRTT9ejhOeEHpqwE3ii0mC3ChgNCbzm1FZCh+FUUlRxUj/hfAevfnpx8xsmqf9bAfsNFNnYxbslGZqp3nBTgtxeuCw8xmcyHTAMMcqPlBkWvW5FWzjKLttmLbh0Yp3TUzZRtEE0LNxeeSXiESViLqD96Lko+XMSL50B/S3AimUUNWAWB4O81P8hhQBkapqOZixTKgA0AoJA1fimlQR37pLqtns8YvC4KKY4xFjY0Dt/ySy+VGewU0ulxuqVFYSFUkeM8r7VA2VKoUUcgyBC6YceTSELVwy5DAchrQcO8IPAq3sB2CVKKOq2i9kiotAoyk8SRJ5ANAnXKVSEeyCThblLpnOlzO+cEl2/BLQOFfgMbFPAPlLeJ9yigEYWsDDUoV9lrbR+fK6tT+jd1+1Z+rd+sP2RlM3nvSaL21j1CWhI2kAjw4tRnhFeaPgX6+lznrvQ3t5S89vXe00DqG927X3enfOjtvu3KhlyhSRmXLEk0mTaJS936/AQLCRY4I9yP4bl+tYOR6KuyQK05mDlDiaRlgpSWGwkaQgxV9DF7UhRAUAAA=="),c=>c.charCodeAt(0));
+const cleanupText=await new Response(new Blob([cleanupBytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+const cleanupSha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(cleanupText)))].map(x=>x.toString(16).padStart(2,'0')).join('');
+if(cleanupSha!=="8e9d5e606da7ad53ba8136570014fe36cd88a77204f3ecd0f124faf18d51353d")fail('界面更新资源校验失败');
+for(const change of JSON.parse(cleanupText)){if(special.split(change[0]).length-1!==change[3])fail('界面更新内容不匹配');special=special.split(change[0]).join(change[1]);}
 const merged=base.slice(0,a)+special+base.slice(b+END.length);
 if(!merged.includes('web-runtime-adapter.js'))fail('主页面缺少 web-runtime-adapter.js');
 status.textContent='校验通过，正在进入…';
